@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIALIBATOU BTP IMMOBILIER - Agence Immobilière Dakar Sénégal</title>
+  <meta name="description" content="DIALIBATOU BTP IMMOBILIER - Votre partenaire immobilier de confiance au Sénégal. Achat, vente, location, construction à Dakar.">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config={theme:{extend:{colors:{gold:{500:'#D4AF37',600:'#B8973A'}}}}}</script>
+  <style>
+    *{font-family:'Inter',sans-serif}h1,h2,h3{font-family:'Playfair Display',serif}
+    .line-clamp-1{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+    .line-clamp-2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  </style>
+</head>
+<body class="bg-white">
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useMemo}=React;
+
+// CONFIG
+const CO={name:"DIALIBATOU BTP IMMOBILIER",addr:"Dakar Ouest, Foire – Cité Khandar, Villa 3",ph:["+221 77 709 61 44","+221 76 949 64 66"],email:"dialibatoubtp@gmail.com",wa:"221777096144",stats:{proj:250,cli:500,yrs:15,prop:180}};
+const NB=["Almadies","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour"];
+const TY=["Appartement","Villa","Terrain","Bureau","Commerce"];
+
+// DATA - 20 Propriétés
+const P=[
+  {id:"p1",ti:"Luxueux Appartement Vue Mer Almadies",de:"Superbe appartement de standing avec vue imprenable sur l'océan. Résidence sécurisée, finitions haut de gamme. 3 chambres, terrasse 25m².",ty:"Appartement",tr:"Vente",pr:185000000,nb:"Almadies",su:180,ro:5,be:3,ba:2,fe:["Piscine","Parking","Sécurité 24h","Vue mer"],im:["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800","https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800"],ft:true,vi:342,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p2",ti:"Appartement Moderne 4P Mermoz",de:"Magnifique appartement contemporain entièrement rénové. Salon double avec balcon, cuisine équipée, chambres climatisées.",ty:"Appartement",tr:"Vente",pr:125000000,nb:"Mermoz",su:140,ro:4,be:3,ba:2,fe:["Parking","Climatisation","Balcon"],im:["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800","https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800"],ft:true,vi:256,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p3",ti:"Studio Meublé Plateau",de:"Studio meublé et équipé au cœur du Plateau. Emplacement premium près ministères et banques.",ty:"Appartement",tr:"Vente",pr:45000000,nb:"Plateau",su:35,ro:1,be:0,ba:1,fe:["Climatisation","Meublé"],im:["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800"],ft:false,vi:189,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p4",ti:"F3 à Louer Ngor",de:"Charmant F3 dans le village de Ngor, près de la plage. Séjour lumineux, cuisine équipée, 2 chambres, terrasse.",ty:"Appartement",tr:"Location",pr:450000,nb:"Ngor",su:85,ro:3,be:2,ba:1,fe:["Terrasse","Climatisation"],im:["https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800"],ft:false,vi:178,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p5",ti:"Penthouse avec Piscine Privée",de:"Penthouse d'exception de 280m² avec piscine privée sur toit-terrasse. 4 chambres en suite. Vue panoramique 360°.",ty:"Appartement",tr:"Vente",pr:450000000,nb:"Almadies",su:280,ro:7,be:4,ba:4,fe:["Piscine","Terrasse","Vue mer","Parking"],im:["https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=800"],ft:true,vi:567,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p6",ti:"Villa Contemporaine Point E",de:"Splendide villa de 6 chambres. Piscine chauffée, jardin paysager, finitions luxe. Bureau, salle de sport.",ty:"Villa",tr:"Vente",pr:380000000,nb:"Point E",su:450,ro:10,be:6,ba:7,fe:["Piscine","Jardin","Parking","Sécurité 24h"],im:["https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800"],ft:true,vi:478,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p7",ti:"Villa Coloniale Rénovée Fann",de:"Charmante villa coloniale entièrement rénovée. Hauts plafonds, parquet, vérandas, jardin tropical.",ty:"Villa",tr:"Vente",pr:295000000,nb:"Fann",su:350,ro:8,be:4,ba:3,fe:["Jardin","Parking","Terrasse"],im:["https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800"],ft:false,vi:267,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p8",ti:"Villa Moderne Sacré-Cœur",de:"Belle villa moderne de 5 chambres. Construction récente, panneaux solaires. Double salon, garage 2 voitures.",ty:"Villa",tr:"Vente",pr:220000000,nb:"Sacré-Cœur",su:280,ro:8,be:5,ba:4,fe:["Jardin","Parking","Sécurité 24h"],im:["https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800"],ft:true,vi:356,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p9",ti:"Villa à Louer Ouakam",de:"Grande villa sur 2 niveaux, idéale pour résidentiel ou professionnel. Jardin 400m², parking 5 véhicules.",ty:"Villa",tr:"Location",pr:2500000,nb:"Ouakam",su:380,ro:10,be:6,ba:4,fe:["Jardin","Parking","Sécurité 24h"],im:["https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800"],ft:false,vi:198,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p10",ti:"Villa Pieds dans l'Eau Ngor",de:"Exceptionnelle villa front de mer. Accès direct plage privée. 5 chambres, piscine à débordement. Propriété rare.",ty:"Villa",tr:"Vente",pr:850000000,nb:"Ngor",su:520,ro:12,be:5,ba:5,fe:["Piscine","Jardin","Vue mer","Terrasse"],im:["https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?w=800"],ft:true,vi:723,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p11",ti:"Terrain Viabilisé 500m² Saly",de:"Excellent terrain viabilisé à Saly, 500m de la plage. Eau, électricité, assainissement. Idéal villa de vacances.",ty:"Terrain",tr:"Vente",pr:35000000,nb:"Saly",su:500,ro:0,be:0,ba:0,fe:[],im:["https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800"],ft:true,vi:234,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p12",ti:"Grand Terrain 1200m² Mbour",de:"Terrain de 1200m² avec titre foncier, accès bitumé. Parfait pour immeuble locatif ou complexe résidentiel.",ty:"Terrain",tr:"Vente",pr:55000000,nb:"Mbour",su:1200,ro:0,be:0,ba:0,fe:[],im:["https://images.unsplash.com/photo-1628624747186-a941c476b7ef?w=800"],ft:false,vi:156,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p13",ti:"Lot Bord de Mer Saly",de:"Rare terrain bord de mer 800m² vue directe océan. Permis de construire obtenu pour villa R+1.",ty:"Terrain",tr:"Vente",pr:150000000,nb:"Saly",su:800,ro:0,be:0,ba:0,fe:["Vue mer"],im:["https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800"],ft:true,vi:298,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p14",ti:"Bureau Premium 300m² Plateau",de:"Espace bureau haut de gamme au cœur du Plateau. Plateau modulable, salles de réunion, climatisation, parking 10 véhicules.",ty:"Bureau",tr:"Location",pr:4500000,nb:"Plateau",su:300,ro:8,be:0,ba:2,fe:["Climatisation","Parking","Sécurité 24h"],im:["https://images.unsplash.com/photo-1497366216548-37526070297c?w=800"],ft:true,vi:234,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p15",ti:"Bureau Moderne 150m² Mermoz",de:"Bureau moderne sur l'axe Mermoz-Sacré Cœur. Open space lumineux, 2 bureaux fermés, salle de réunion.",ty:"Bureau",tr:"Location",pr:1500000,nb:"Mermoz",su:150,ro:5,be:0,ba:1,fe:["Climatisation","Parking"],im:["https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=800"],ft:false,vi:156,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p16",ti:"Boutique Premium Plateau",de:"Local commercial 80m² avec vitrine sur rue passante. Fort trafic piétonnier. Idéal mode, électronique.",ty:"Commerce",tr:"Location",pr:800000,nb:"Plateau",su:80,ro:2,be:0,ba:1,fe:[],im:["https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800"],ft:false,vi:178,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p17",ti:"Restaurant Équipé à Reprendre",de:"Restaurant entièrement équipé 120m². Cuisine professionnelle, salle 40 couverts, terrasse. Clientèle établie.",ty:"Commerce",tr:"Vente",pr:45000000,nb:"Liberté",su:120,ro:3,be:0,ba:2,fe:["Climatisation","Terrasse"],im:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800"],ft:true,vi:234,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p18",ti:"Appartement Meublé Standing Mamelles",de:"Magnifique appartement meublé vue sur le phare et l'océan. Décoration design, 3 chambres, cuisine équipée.",ty:"Appartement",tr:"Location",pr:1800000,nb:"Mamelles",su:160,ro:4,be:3,ba:2,fe:["Meublé","Vue mer","Piscine","Terrasse"],im:["https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800"],ft:true,vi:289,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
+  {id:"p19",ti:"Villa Familiale Liberté 6",de:"Agréable villa familiale dans quartier calme. 4 chambres, 2 salles de bain, jardin fleuri, parking couvert.",ty:"Villa",tr:"Vente",pr:145000000,nb:"Liberté",su:220,ro:6,be:4,ba:2,fe:["Jardin","Parking","Climatisation"],im:["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800"],ft:false,vi:167,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
+  {id:"p20",ti:"Villa Duplex Moderne Almadies",de:"Superbe villa duplex à 5 min de la plage. Architecture contemporaine, piscine. 4 suites parentales. Domotique.",ty:"Villa",tr:"Location",pr:3500000,nb:"Almadies",su:400,ro:9,be:4,ba:4,fe:["Piscine","Jardin","Parking","Sécurité 24h"],im:["https://images.unsplash.com/photo-1600573472592-401b489a3cdc?w=800"],ft:true,vi:412,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}}
+];
+
+// TESTIMONIALS
+const TE=[
+  {na:"Mamadou Ndiaye",ro:"Directeur Général",co:"DIALIBATOU nous a accompagnés dans l'acquisition de notre siège social. Expertise remarquable.",im:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200"},
+  {na:"Aïssatou Diallo",ro:"Médecin",co:"Grâce à DIALIBATOU, j'ai trouvé la maison de mes rêves aux Almadies. Équipe à l'écoute.",im:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"},
+  {na:"Pierre Dubois",ro:"Expatrié",co:"Service impeccable pour notre recherche de villa. L'agence a parfaitement compris nos critères.",im:"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200"},
+  {na:"Ousmane Sarr",ro:"Entrepreneur",co:"Construction de mon usine livrée avec qualité, délais respectés et budget maîtrisé. Je recommande.",im:"https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200"}
+];
+
+// UTILS
+const fP=(p,t)=>p>=1e6?`${(p/1e6).toFixed(0)} M FCFA${t==="Location"?"/mois":""}`:`${p.toLocaleString('fr-FR')} FCFA${t==="Location"?"/mois":""}`;
+
+// ICONS SVG
+const I={
+  home:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>,
+  building:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>,
+  map:<><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></>,
+  phone:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>,
+  mail:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>,
+  search:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>,
+  heart:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>,
+  chevR:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>,
+  chevL:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/>,
+  menu:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>,
+  x:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/>,
+  star:<path fill="currentColor" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>,
+  users:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>,
+  award:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>,
+  clock:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>,
+  check:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/>,
+  arrR:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3"/>,
+  arrU:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18"/>,
+  bed:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>,
+  square:<rect x="3" y="3" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}/>,
+  eye:<><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></>,
+  msg:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>,
+  cal:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>,
+  hammer:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>,
+  shield:<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+};
+const Ic=({n,c="w-5 h-5"})=><svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">{I[n]}</svg>;
+
+// COMPONENTS
+const Logo=({l})=>(
+  <div className="flex items-center gap-2">
+    <Ic n="building" c={`w-8 h-8 ${l?'text-amber-400':'text-amber-500'}`}/>
+    <div className="flex flex-col">
+      <span className={`text-xl font-bold ${l?'text-white':'text-gray-900'}`}>DIALI<span className="text-amber-500">BATOU</span></span>
+      <span className={`text-xs font-medium tracking-widest ${l?'text-gray-300':'text-gray-600'}`}>BTP IMMOBILIER</span>
+    </div>
+  </div>
+);
+
+const Btn=({ch,v="primary",sz="md",cl="",onClick})=>{
+  const vs={primary:"bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg",outline:"border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white",white:"bg-white text-gray-900 hover:bg-gray-100 shadow-lg",ghost:"text-gray-700 hover:bg-gray-100"};
+  const szs={sm:"px-3 py-1.5 text-sm",md:"px-5 py-2.5",lg:"px-8 py-3.5 text-lg"};
+  return <button onClick={onClick} className={`inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all ${vs[v]} ${szs[sz]} ${cl}`}>{ch}</button>;
+};
+
+const Badge=({ch,v="default"})=>{
+  const vs={default:"bg-gray-100 text-gray-800",primary:"bg-amber-100 text-amber-800",sale:"bg-gradient-to-r from-amber-500 to-amber-600 text-white",rent:"bg-gradient-to-r from-blue-500 to-blue-600 text-white"};
+  return <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${vs[v]}`}>{ch}</span>;
+};
+
+const Card=({p,onV})=>{
+  const [i,sI]=useState(0);
+  return(
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all">
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img src={p.im[i]} alt={p.ti} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+        {p.im.length>1&&<>
+          <button onClick={e=>{e.stopPropagation();sI(x=>x>0?x-1:p.im.length-1)}} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100"><Ic n="chevL" c="w-4 h-4"/></button>
+          <button onClick={e=>{e.stopPropagation();sI(x=>x<p.im.length-1?x+1:0)}} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100"><Ic n="chevR" c="w-4 h-4"/></button>
+        </>}
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <Badge ch={p.tr==="Vente"?"À VENDRE":"À LOUER"} v={p.tr==="Vente"?"sale":"rent"}/>
+          {p.ft&&<Badge ch={<><Ic n="star" c="w-3 h-3 mr-1"/>Premium</>} v="primary"/>}
+        </div>
+        <button className="absolute top-3 right-3 p-2 rounded-full bg-white/80 text-gray-600 hover:bg-white hover:text-red-500"><Ic n="heart" c="w-5 h-5"/></button>
+      </div>
+      <div className="p-5">
+        <p className="text-2xl font-bold text-amber-600 mb-2">{fP(p.pr,p.tr)}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1 group-hover:text-amber-600">{p.ti}</h3>
+        <p className="flex items-center text-gray-500 text-sm mb-4"><Ic n="map" c="w-4 h-4 mr-1"/><span className="line-clamp-1">{p.nb}, Dakar</span></p>
+        {p.ty!=="Terrain"&&<div className="flex items-center gap-4 text-gray-600 text-sm mb-4">
+          <span className="flex items-center gap-1"><Ic n="square" c="w-4 h-4"/>{p.su} m²</span>
+          {p.be>0&&<span className="flex items-center gap-1"><Ic n="bed" c="w-4 h-4"/>{p.be}</span>}
+        </div>}
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <Badge ch={p.ty}/>
+          <span className="flex items-center text-gray-400 text-sm"><Ic n="eye" c="w-4 h-4 mr-1"/>{p.vi}</span>
+        </div>
+        <Btn ch={<>Voir détails<Ic n="arrR" c="w-4 h-4"/></>} v="outline" cl="w-full mt-4" onClick={()=>onV(p)}/>
+      </div>
+    </div>
+  );
+};
+
+const Header=({pg,sP})=>{
+  const [mo,sMo]=useState(false);
+  const [sc,sSc]=useState(false);
+  useEffect(()=>{const h=()=>sSc(window.scrollY>50);window.addEventListener('scroll',h);return()=>window.removeEventListener('scroll',h)},[]);
+  const nav=[{id:'home',l:'Accueil'},{id:'properties',l:'Biens'},{id:'services',l:'Services'},{id:'contact',l:'Contact'}];
+  return(
+    <header className={`fixed top-0 left-0 right-0 z-40 transition-all ${sc?'bg-white shadow-lg':'bg-white/95 backdrop-blur-md'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <button onClick={()=>sP('home')}><Logo/></button>
+          <nav className="hidden md:flex items-center gap-1">
+            {nav.map(n=><button key={n.id} onClick={()=>sP(n.id)} className={`px-4 py-2 rounded-lg font-medium transition-all ${pg===n.id?'text-amber-600 bg-amber-50':'text-gray-700 hover:text-amber-600 hover:bg-gray-50'}`}>{n.l}</button>)}
+          </nav>
+          <div className="hidden md:flex items-center gap-4">
+            <a href={`https://wa.me/${CO.wa}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium"><Ic n="msg" c="w-5 h-5"/>WhatsApp</a>
+          </div>
+          <button onClick={()=>sMo(!mo)} className="md:hidden p-2 rounded-lg hover:bg-gray-100"><Ic n={mo?"x":"menu"} c="w-6 h-6"/></button>
+        </div>
+      </div>
+      {mo&&<div className="md:hidden bg-white border-t shadow-lg"><div className="px-4 py-6 space-y-2">
+        {nav.map(n=><button key={n.id} onClick={()=>{sP(n.id);sMo(false)}} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${pg===n.id?'text-amber-600 bg-amber-50':'text-gray-700 hover:bg-gray-50'}`}>{n.l}</button>)}
+      </div></div>}
+    </header>
+  );
+};
+
+const Footer=({sP})=>(
+  <footer className="bg-gray-900 text-white">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="space-y-6"><Logo l/><p className="text-gray-400">Votre partenaire immobilier de confiance au Sénégal.</p></div>
+        <div><h4 className="text-lg font-bold mb-6">Navigation</h4><ul className="space-y-3">{['Accueil','Biens','Services','Contact'].map((i,x)=><li key={x}><button onClick={()=>sP(['home','properties','services','contact'][x])} className="text-gray-400 hover:text-amber-500 flex items-center gap-2"><Ic n="chevR" c="w-4 h-4"/>{i}</button></li>)}</ul></div>
+        <div><h4 className="text-lg font-bold mb-6">Services</h4><ul className="space-y-3">{['Achat & Vente','Location','Gestion','Construction'].map((i,x)=><li key={x} className="text-gray-400 flex items-start gap-2"><Ic n="check" c="w-4 h-4 mt-1 text-amber-500"/>{i}</li>)}</ul></div>
+        <div><h4 className="text-lg font-bold mb-6">Contact</h4><ul className="space-y-4">
+          <li className="flex items-start gap-3"><Ic n="map" c="w-5 h-5 text-amber-500 mt-1"/><span className="text-gray-400">{CO.addr}</span></li>
+          {CO.ph.map((p,i)=><li key={i} className="flex items-center gap-3"><Ic n="phone" c="w-5 h-5 text-amber-500"/><a href={`tel:${p}`} className="text-gray-400 hover:text-amber-500">{p}</a></li>)}
+          <li className="flex items-center gap-3"><Ic n="mail" c="w-5 h-5 text-amber-500"/><a href={`mailto:${CO.email}`} className="text-gray-400 hover:text-amber-500">{CO.email}</a></li>
+        </ul></div>
+      </div>
+    </div>
+    <div className="border-t border-gray-800"><div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-400 text-sm">© {new Date().getFullYear()} {CO.name}. Tous droits réservés.</div></div>
+  </footer>
+);
+
+// PAGES
+const Home=({sP,sS})=>{
+  const ft=P.filter(p=>p.ft).slice(0,6);
+  return(<div>
+    {/* HERO */}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0"><img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920" alt="Dakar" className="w-full h-full object-cover"/><div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent"/></div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2 bg-amber-500/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-4 py-2 mb-6"><span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"/><span className="text-amber-400 text-sm font-medium">Leader immobilier au Sénégal</span></div>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">Construisons ensemble <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">votre avenir immobilier</span></h1>
+          <p className="text-xl text-gray-300 mb-10">Achat, vente, location, construction : votre partenaire de confiance à Dakar et au Sénégal.</p>
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+              <select className="w-full px-4 py-3 bg-white/90 rounded-lg text-gray-800"><option value="">Transaction</option><option>Achat</option><option>Location</option></select>
+              <select className="w-full px-4 py-3 bg-white/90 rounded-lg text-gray-800"><option value="">Type de bien</option>{TY.map(t=><option key={t}>{t}</option>)}</select>
+              <select className="w-full px-4 py-3 bg-white/90 rounded-lg text-gray-800"><option value="">Quartier</option>{NB.map(n=><option key={n}>{n}</option>)}</select>
+            </div>
+            <Btn ch={<><Ic n="search" c="w-5 h-5"/>Rechercher</>} sz="lg" onClick={()=>sP('properties')}/>
+          </div>
+        </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-8">
+        <div className="max-w-7xl mx-auto px-4"><div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[{v:CO.stats.proj,l:'Projets réalisés',s:'+'},{v:CO.stats.cli,l:'Clients satisfaits',s:'+'},{v:CO.stats.yrs,l:"Années d'expérience",s:''},{v:CO.stats.prop,l:'Biens disponibles',s:'+'}].map((s,i)=><div key={i}><p className="text-3xl md:text-4xl font-bold text-amber-500">{s.v}{s.s}</p><p className="text-gray-300 text-sm mt-1">{s.l}</p></div>)}
+        </div></div>
+      </div>
+    </section>
+    {/* FEATURED */}
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
+          <div><span className="text-amber-600 font-semibold uppercase tracking-wider">Notre sélection</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Biens en vedette</h2></div>
+          <Btn ch={<>Voir tout<Ic n="arrR" c="w-4 h-4"/></>} v="outline" onClick={()=>sP('properties')}/>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{ft.map(p=><Card key={p.id} p={p} onV={x=>{sS(x);sP('detail')}}/>)}</div>
+      </div>
+    </section>
+    {/* SERVICES */}
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Nos services</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4">Solutions immobilières complètes</h2></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[{i:'home',t:'Achat & Vente',d:'Accompagnement personnalisé pour toutes vos transactions'},{i:'building',t:'Location',d:'Trouvez ou mettez en location votre bien idéal'},{i:'hammer',t:'Construction',d:'Projets clé en main avec les meilleurs standards'},{i:'shield',t:'Gestion',d:'Confiez-nous la gestion de votre patrimoine'}].map((s,x)=>(
+            <div key={x} className="bg-white rounded-2xl shadow-lg p-6 text-center group cursor-pointer hover:shadow-2xl transition-all">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 mb-6 group-hover:scale-110 transition-transform"><Ic n={s.i} c="w-8 h-8"/></div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{s.t}</h3><p className="text-gray-600">{s.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+    {/* WHY US */}
+    <section className="py-20 bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <span className="text-amber-500 font-semibold uppercase tracking-wider">Pourquoi nous choisir</span>
+            <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-6">L'excellence immobilière</h2>
+            <p className="text-gray-300 mb-8">Depuis plus de {CO.stats.yrs} ans, nous offrons des services de qualité supérieure à Dakar et au Sénégal.</p>
+            <div className="space-y-6">
+              {[{i:'award',t:'Expertise reconnue',d:'Connaissance approfondie du marché sénégalais'},{i:'users',t:'Accompagnement personnalisé',d:'Suivi sur mesure adapté à vos besoins'},{i:'shield',t:'Transparence totale',d:'Transactions sécurisées et communication claire'}].map((x,i)=>(
+                <div key={i} className="flex gap-4"><div className="flex-shrink-0 w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center"><Ic n={x.i} c="w-6 h-6 text-amber-500"/></div><div><h3 className="font-bold text-lg">{x.t}</h3><p className="text-gray-400">{x.d}</p></div></div>
+              ))}
+            </div>
+            <Btn ch={<>Contactez-nous<Ic n="arrR" c="w-5 h-5"/></>} v="white" sz="lg" cl="mt-10" onClick={()=>sP('contact')}/>
+          </div>
+          <div className="relative"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800" alt="" className="rounded-2xl shadow-2xl"/><div className="absolute -bottom-8 -left-8 bg-amber-500 text-white p-6 rounded-2xl shadow-xl"><p className="text-4xl font-bold">{CO.stats.yrs}+</p><p className="text-sm opacity-90">Années d'expérience</p></div></div>
+        </div>
+      </div>
+    </section>
+    {/* TESTIMONIALS */}
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Témoignages</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Ce que disent nos clients</h2></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {TE.map((t,i)=><div key={i} className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center gap-1 mb-4">{[1,2,3,4,5].map(x=><Ic key={x} n="star" c="w-5 h-5 text-amber-500"/>)}</div>
+            <p className="text-gray-600 mb-6 italic">"{t.co}"</p>
+            <div className="flex items-center gap-3"><img src={t.im} alt={t.na} className="w-12 h-12 rounded-full object-cover"/><div><p className="font-bold text-gray-900">{t.na}</p><p className="text-sm text-gray-500">{t.ro}</p></div></div>
+          </div>)}
+        </div>
+      </div>
+    </section>
+    {/* CTA */}
+    <section className="py-20 bg-gradient-to-r from-amber-500 to-amber-600">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Prêt à concrétiser votre projet ?</h2>
+        <p className="text-xl text-amber-100 mb-10">Contactez-nous pour une consultation gratuite</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Btn ch={<><Ic n="cal" c="w-5 h-5"/>Rendez-vous</>} v="white" sz="lg" onClick={()=>sP('contact')}/>
+          <a href={`https://wa.me/${CO.wa}`} target="_blank" rel="noopener noreferrer"><Btn ch={<><Ic n="msg" c="w-5 h-5"/>WhatsApp</>} v="outline" sz="lg" cl="border-white text-white hover:bg-white hover:text-amber-600 w-full"/></a>
+        </div>
+      </div>
+    </section>
+  </div>);
+};
+
+const Props=({sP,sS})=>{
+  const [f,sF]=useState({ty:'',tr:'',nb:'',pm:''});
+  const [so,sSo]=useState('');
+  const fl=useMemo(()=>{
+    let r=[...P];
+    if(f.ty)r=r.filter(p=>p.ty===f.ty);
+    if(f.tr)r=r.filter(p=>p.tr===f.tr);
+    if(f.nb)r=r.filter(p=>p.nb===f.nb);
+    if(f.pm)r=r.filter(p=>p.pr<=parseInt(f.pm));
+    if(so==='pa')r.sort((a,b)=>a.pr-b.pr);
+    if(so==='pd')r.sort((a,b)=>b.pr-a.pr);
+    if(so==='vi')r.sort((a,b)=>b.vi-a.vi);
+    return r;
+  },[f,so]);
+  return(<div className="min-h-screen bg-gray-50 pt-24">
+    <div className="bg-gradient-to-r from-gray-900 to-gray-800 py-16"><div className="max-w-7xl mx-auto px-4"><h1 className="text-4xl font-bold text-white mb-4">Nos biens immobiliers</h1><p className="text-gray-300">{P.length} biens disponibles à Dakar et au Sénégal</p></div></div>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <select value={f.ty} onChange={e=>sF({...f,ty:e.target.value})} className="px-4 py-3 border border-gray-300 rounded-lg"><option value="">Tous types</option>{TY.map(t=><option key={t} value={t}>{t}</option>)}</select>
+          <select value={f.tr} onChange={e=>sF({...f,tr:e.target.value})} className="px-4 py-3 border border-gray-300 rounded-lg"><option value="">Toutes transactions</option><option value="Vente">Vente</option><option value="Location">Location</option></select>
+          <select value={f.nb} onChange={e=>sF({...f,nb:e.target.value})} className="px-4 py-3 border border-gray-300 rounded-lg"><option value="">Tous quartiers</option>{NB.map(n=><option key={n} value={n}>{n}</option>)}</select>
+          <select value={f.pm} onChange={e=>sF({...f,pm:e.target.value})} className="px-4 py-3 border border-gray-300 rounded-lg"><option value="">Budget max</option><option value="50000000">50 M</option><option value="100000000">100 M</option><option value="200000000">200 M</option><option value="500000000">500 M</option></select>
+          <select value={so} onChange={e=>sSo(e.target.value)} className="px-4 py-3 border border-gray-300 rounded-lg"><option value="">Trier par</option><option value="pa">Prix ↑</option><option value="pd">Prix ↓</option><option value="vi">Plus vus</option></select>
+        </div>
+      </div>
+      <p className="text-gray-600 mb-6">{fl.length} bien{fl.length>1?'s':''} trouvé{fl.length>1?'s':''}</p>
+      {fl.length===0?<div className="text-center py-16"><Ic n="building" c="w-16 h-16 text-gray-300 mx-auto mb-4"/><h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun bien trouvé</h3><Btn ch="Réinitialiser" onClick={()=>sF({ty:'',tr:'',nb:'',pm:''})}/></div>
+      :<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{fl.map(p=><Card key={p.id} p={p} onV={x=>{sS(x);sP('detail')}}/>)}</div>}
+    </div>
+  </div>);
+};
+
+const Detail=({p,sP})=>{
+  const [i,sI]=useState(0);
+  if(!p)return<div className="min-h-screen flex items-center justify-center pt-24"><p>Non trouvé</p><Btn ch="Retour" cl="mt-4" onClick={()=>sP('properties')}/></div>;
+  return(<div className="min-h-screen bg-gray-50 pt-24">
+    <div className="bg-white border-b"><div className="max-w-7xl mx-auto px-4 py-4"><div className="flex items-center gap-2 text-sm"><button onClick={()=>sP('home')} className="text-gray-500 hover:text-amber-600">Accueil</button><Ic n="chevR" c="w-4 h-4 text-gray-400"/><button onClick={()=>sP('properties')} className="text-gray-500 hover:text-amber-600">Biens</button><Ic n="chevR" c="w-4 h-4 text-gray-400"/><span className="text-gray-900 font-medium truncate">{p.ti}</span></div></div></div>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="col-span-4 md:col-span-3 relative aspect-[16/10] rounded-2xl overflow-hidden">
+          <img src={p.im[i]} alt={p.ti} className="w-full h-full object-cover"/>
+          {p.im.length>1&&<><button onClick={()=>sI(x=>x>0?x-1:p.im.length-1)} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 rounded-full hover:bg-white"><Ic n="chevL" c="w-6 h-6"/></button><button onClick={()=>sI(x=>x<p.im.length-1?x+1:0)} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 rounded-full hover:bg-white"><Ic n="chevR" c="w-6 h-6"/></button></>}
+        </div>
+        <div className="col-span-4 md:col-span-1 grid grid-cols-4 md:grid-cols-1 gap-2">{p.im.slice(0,4).map((im,x)=><div key={x} className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${x===i?'ring-2 ring-amber-500':''}`} onClick={()=>sI(x)}><img src={im} alt="" className="w-full h-full object-cover hover:scale-110 transition-transform"/></div>)}</div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+              <div><div className="flex items-center gap-2 mb-2"><Badge ch={p.tr==="Vente"?"À VENDRE":"À LOUER"} v={p.tr==="Vente"?"sale":"rent"}/><Badge ch={p.ty}/></div><h1 className="text-2xl md:text-3xl font-bold text-gray-900">{p.ti}</h1><p className="flex items-center text-gray-600 mt-2"><Ic n="map" c="w-5 h-5 mr-2 text-amber-500"/>{p.nb}, Dakar</p></div>
+              <div className="text-right"><p className="text-3xl font-bold text-amber-600">{fP(p.pr,p.tr)}</p>{p.ty!=="Terrain"&&<p className="text-sm text-gray-500 mt-1">{Math.round(p.pr/p.su).toLocaleString('fr-FR')} FCFA/m²</p>}</div>
+            </div>
+            {p.ty!=="Terrain"&&<div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t">
+              <div className="text-center p-4 bg-gray-50 rounded-lg"><Ic n="square" c="w-6 h-6 text-amber-500 mx-auto mb-2"/><p className="font-bold text-gray-900">{p.su} m²</p><p className="text-sm text-gray-500">Surface</p></div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg"><Ic n="home" c="w-6 h-6 text-amber-500 mx-auto mb-2"/><p className="font-bold text-gray-900">{p.ro}</p><p className="text-sm text-gray-500">Pièces</p></div>
+              {p.be>0&&<div className="text-center p-4 bg-gray-50 rounded-lg"><Ic n="bed" c="w-6 h-6 text-amber-500 mx-auto mb-2"/><p className="font-bold text-gray-900">{p.be}</p><p className="text-sm text-gray-500">Chambres</p></div>}
+              {p.ba>0&&<div className="text-center p-4 bg-gray-50 rounded-lg"><Ic n="users" c="w-6 h-6 text-amber-500 mx-auto mb-2"/><p className="font-bold text-gray-900">{p.ba}</p><p className="text-sm text-gray-500">SDB</p></div>}
+            </div>}
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg p-6"><h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2><p className="text-gray-600 leading-relaxed">{p.de}</p></div>
+          {p.fe.length>0&&<div className="bg-white rounded-2xl shadow-lg p-6"><h2 className="text-xl font-bold text-gray-900 mb-4">Équipements</h2><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{p.fe.map((f,x)=><div key={x} className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"><Ic n="check" c="w-5 h-5 text-green-600"/></div><span className="text-gray-700">{f}</span></div>)}</div></div>}
+        </div>
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Votre conseiller</h3>
+            <div className="flex items-center gap-4 mb-6"><div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center"><Ic n="users" c="w-8 h-8 text-amber-600"/></div><div><p className="font-bold text-gray-900">{p.ag.na}</p><p className="text-sm text-gray-500">Expert immobilier</p></div></div>
+            <div className="space-y-3 mb-6"><a href={`tel:${p.ag.ph}`} className="flex items-center gap-3 text-gray-700 hover:text-amber-600"><Ic n="phone" c="w-5 h-5"/>{p.ag.ph}</a></div>
+            <div className="space-y-3">
+              <Btn ch={<><Ic n="cal" c="w-5 h-5"/>Demander une visite</>} cl="w-full" onClick={()=>sP('contact')}/>
+              <a href={`https://wa.me/${CO.wa}?text=Bonjour, je suis intéressé par: ${p.ti}`} target="_blank" rel="noopener noreferrer" className="block"><Btn ch={<><Ic n="msg" c="w-5 h-5"/>WhatsApp</>} v="outline" cl="w-full bg-green-50 border-green-500 text-green-700 hover:bg-green-100"/></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>);
+};
+
+const Serv=({sP})=>(
+  <div className="min-h-screen bg-gray-50 pt-24">
+    <div className="bg-gradient-to-r from-gray-900 to-gray-800 py-20"><div className="max-w-7xl mx-auto px-4 text-center"><h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Nos Services</h1><p className="text-xl text-gray-300">Solutions immobilières complètes</p></div></div>
+    <div className="max-w-7xl mx-auto px-4 py-16 space-y-24">
+      {[
+        {i:'home',t:'Achat & Vente',d:'Accompagnement complet dans toutes vos transactions immobilières.',f:['Évaluation gratuite','Diffusion multi-canaux','Visites accompagnées','Négociation professionnelle','Accompagnement juridique'],im:'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600'},
+        {i:'building',t:'Location',d:'Trouvez le logement idéal ou mettez votre bien en location sereinement.',f:['Sélection locataires','État des lieux','Rédaction bail','Gestion cautions','Conseil loyers'],im:'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600'},
+        {i:'hammer',t:'Construction',d:'Projets clé en main avec les meilleurs standards de qualité.',f:['Études faisabilité','Plans architecturaux','Terrassement VRD','Construction','Garantie décennale'],im:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600'},
+        {i:'shield',t:'Gestion Immobilière',d:'Confiez-nous la gestion de votre patrimoine.',f:['Encaissement loyers','Gestion charges','Entretien','Reporting mensuel','Optimisation fiscale'],im:'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600'}
+      ].map((s,x)=>(
+        <div key={x} className={`grid grid-cols-1 lg:grid-cols-2 gap-12 items-center ${x%2===1?'lg:flex-row-reverse':''}`}>
+          <div className={x%2===1?'lg:order-2':''}>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 mb-6"><Ic n={s.i} c="w-8 h-8"/></div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{s.t}</h2>
+            <p className="text-lg text-gray-600 mb-8">{s.d}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">{s.f.map((f,i)=><div key={i} className="flex items-start gap-3"><div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5"><Ic n="check" c="w-4 h-4 text-green-600"/></div><span className="text-gray-700">{f}</span></div>)}</div>
+            <Btn ch={<>Demander un devis<Ic n="arrR" c="w-5 h-5"/></>} onClick={()=>sP('contact')}/>
+          </div>
+          <div className={x%2===1?'lg:order-1':''}><img src={s.im} alt={s.t} className="rounded-2xl shadow-2xl w-full"/></div>
+        </div>
+      ))}
+    </div>
+    <div className="bg-amber-500 py-16"><div className="max-w-4xl mx-auto px-4 text-center">
+      <h2 className="text-3xl font-bold text-white mb-4">Un projet en tête ?</h2>
+      <p className="text-xl text-amber-100 mb-8">Contactez-nous pour une consultation gratuite</p>
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Btn ch="Nous contacter" v="white" sz="lg" onClick={()=>sP('contact')}/>
+        <a href={`https://wa.me/${CO.wa}`} target="_blank" rel="noopener noreferrer"><Btn ch={<><Ic n="msg" c="w-5 h-5"/>WhatsApp</>} v="outline" sz="lg" cl="border-white text-white hover:bg-white hover:text-amber-600 w-full"/></a>
+      </div>
+    </div></div>
+  </div>
+);
+
+const Contact=()=>{
+  const [f,sF]=useState({na:'',em:'',ph:'',ms:''});
+  const [se,sSe]=useState(false);
+  const hS=e=>{e.preventDefault();sSe(true);};
+  return(<div className="min-h-screen bg-gray-50 pt-24">
+    <div className="bg-gradient-to-r from-gray-900 to-gray-800 py-20"><div className="max-w-7xl mx-auto px-4 text-center"><h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Contactez-nous</h1><p className="text-xl text-gray-300">Notre équipe est à votre disposition</p></div></div>
+    <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="space-y-8">
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Nos coordonnées</h3>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4"><div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><Ic n="map" c="w-6 h-6 text-amber-600"/></div><div><p className="font-medium text-gray-900">Adresse</p><p className="text-gray-600">{CO.addr}</p></div></div>
+              <div className="flex items-start gap-4"><div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><Ic n="phone" c="w-6 h-6 text-amber-600"/></div><div><p className="font-medium text-gray-900">Téléphones</p>{CO.ph.map((p,i)=><a key={i} href={`tel:${p}`} className="block text-gray-600 hover:text-amber-600">{p}</a>)}</div></div>
+              <div className="flex items-start gap-4"><div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><Ic n="mail" c="w-6 h-6 text-amber-600"/></div><div><p className="font-medium text-gray-900">Email</p><a href={`mailto:${CO.email}`} className="text-gray-600 hover:text-amber-600">{CO.email}</a></div></div>
+              <div className="flex items-start gap-4"><div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><Ic n="clock" c="w-6 h-6 text-amber-600"/></div><div><p className="font-medium text-gray-900">Horaires</p><p className="text-gray-600">Lun - Sam: 8h00 - 18h00</p></div></div>
+            </div>
+          </div>
+          <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
+            <div className="flex items-center gap-4 mb-4"><div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center"><Ic n="msg" c="w-6 h-6 text-white"/></div><div><p className="font-bold text-gray-900">WhatsApp</p><p className="text-sm text-gray-600">Réponse rapide</p></div></div>
+            <a href={`https://wa.me/${CO.wa}`} target="_blank" rel="noopener noreferrer"><Btn ch="Démarrer une conversation" cl="w-full bg-green-500 hover:bg-green-600"/></a>
+          </div>
+        </div>
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Envoyez-nous un message</h3>
+            {se?<div className="text-center py-12"><div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><Ic n="check" c="w-8 h-8 text-green-600"/></div><h3 className="text-xl font-bold text-gray-900 mb-2">Message envoyé !</h3><p className="text-gray-600">Notre équipe vous contactera rapidement.</p></div>
+            :<form onSubmit={hS} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div><label className="block text-sm font-medium text-gray-700 mb-2">Nom *</label><input type="text" required value={f.na} onChange={e=>sF({...f,na:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Votre nom"/></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-2">Email *</label><input type="email" required value={f.em} onChange={e=>sF({...f,em:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="votre@email.com"/></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label><input type="tel" required value={f.ph} onChange={e=>sF({...f,ph:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="+221 77 XXX XX XX"/></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-2">Message *</label><textarea required rows={5} value={f.ms} onChange={e=>sF({...f,ms:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Décrivez votre projet..."/></div>
+              <Btn ch={<><Ic n="arrR" c="w-5 h-5"/>Envoyer</>} sz="lg" cl="w-full"/>
+            </form>}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>);
+};
+
+// APP
+const App=()=>{
+  const [pg,sPg]=useState('home');
+  const [sel,sSel]=useState(null);
+  useEffect(()=>{window.scrollTo(0,0)},[pg]);
+  const rP=()=>{
+    switch(pg){
+      case 'home':return <Home sP={sPg} sS={sSel}/>;
+      case 'properties':return <Props sP={sPg} sS={sSel}/>;
+      case 'detail':return <Detail p={sel} sP={sPg}/>;
+      case 'services':return <Serv sP={sPg}/>;
+      case 'contact':return <Contact/>;
+      default:return <Home sP={sPg} sS={sSel}/>;
+    }
+  };
+  return(<div className="min-h-screen bg-white">
+    <Header pg={pg} sP={sPg}/>
+    <main>{rP()}</main>
+    <Footer sP={sPg}/>
+    <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="fixed bottom-6 right-6 p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors z-30"><Ic n="arrU" c="w-6 h-6"/></button>
+  </div>);
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
