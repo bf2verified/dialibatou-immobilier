@@ -28,7 +28,7 @@ const {useState,useEffect,useMemo,useRef,useCallback}=React;
 
 // CONFIG
 const CO={name:"DIALIBATOU BTP IMMOBILIER",addr:"Dakar Ouest, Foire – Cité Khandar, Villa 3",ph:["+221 77 709 61 44","+221 76 949 64 66"],email:"dialibatoubtp@gmail.com",wa:"221777096144",stats:{proj:250,cli:500,yrs:15,prop:180},adminPwd:"dialibatou2024"};
-const NB=["Almadies","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour","Thiès","Bambilor","Pout","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Yène","Toubab Dialao","Ndayane","Keur Massar","Diakhaye","Kounoune","Diass","Keur Ndiaye Lo","Sindia","Malikounda","Sébikotane","Nguérigne","Gorom","Bayakh"];
+const NB=["Almadies","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour","Thiès","Bambilor","Pout","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Yène","Toubab Dialao","Ndayane","Keur Massar","Diakhaye","Kounoune","Diass","Keur Ndiaye Lo","Sindia","Malikounda","Sébikotane","Nguérigne","Gorom","Bayakh","Keur Moussa"];
 const TY=["Appartement","Villa","Terrain","Bureau","Commerce"];
 
 // TERRAINS LOTISSÉS COOPÉRATIVE (données initiales)
@@ -941,8 +941,10 @@ const Admin=({sP,data})=>{
 
   // Property form
   const PropForm=({p,onSave,onCancel})=>{
-    const [f,sF]=useState(p||{ti:'',de:'',ty:'Appartement',tr:'Vente',pr:0,nb:'',su:0,ro:0,be:0,ba:0,fe:[],im:[''],ft:false,vi:0,ag:{na:'Amadou Diallo',ph:CO.ph[0]}});
+    const [f,sF]=useState(p||{ti:'',de:'',ty:'Appartement',tr:'Vente',pr:0,nb:'',su:0,ro:0,be:0,ba:0,fe:[],im:[],vd:[],ft:false,vi:0,ag:{na:'Amadou Diallo',ph:CO.ph[0]}});
     const [feInput,sFeInput]=useState('');
+    const [imInput,sImInput]=useState('');
+    const [vdInput,sVdInput]=useState('');
     return(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -959,7 +961,44 @@ const Admin=({sP,data})=>{
               <div><label className="block text-sm font-medium mb-1">Pièces</label><input type="number" value={f.ro} onChange={e=>sF({...f,ro:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
               <div><label className="block text-sm font-medium mb-1">Chambres</label><input type="number" value={f.be} onChange={e=>sF({...f,be:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
               <div><label className="block text-sm font-medium mb-1">Salles de bain</label><input type="number" value={f.ba} onChange={e=>sF({...f,ba:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
-              <div className="md:col-span-2"><label className="block text-sm font-medium mb-1">URL Image</label><input value={f.im[0]} onChange={e=>sF({...f,im:[e.target.value]})} className="w-full px-3 py-2 border rounded-lg" placeholder="https://images.unsplash.com/..."/></div>
+
+              {/* Photos */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Photos (URLs)</label>
+                <div className="flex gap-2 mb-2">
+                  <input value={imInput} onChange={e=>sImInput(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" placeholder="https://images.unsplash.com/..."/>
+                  <Btn ch="+ Photo" sz="sm" onClick={()=>{if(imInput){sF({...f,im:[...f.im,imInput]});sImInput('')}}}/>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {f.im.map((url,i)=>url&&(
+                    <div key={i} className="relative group">
+                      <img src={url} alt={`Photo ${i+1}`} className="w-full h-20 object-cover rounded-lg border"/>
+                      <button onClick={()=>sF({...f,im:f.im.filter((_,j)=>j!==i)})} className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity">&times;</button>
+                    </div>
+                  ))}
+                </div>
+                {f.im.length===0&&<p className="text-gray-400 text-sm">Aucune photo ajoutée</p>}
+              </div>
+
+              {/* Vidéos */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Vidéos (URLs YouTube, Vimeo, etc.)</label>
+                <div className="flex gap-2 mb-2">
+                  <input value={vdInput} onChange={e=>sVdInput(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" placeholder="https://www.youtube.com/watch?v=..."/>
+                  <Btn ch="+ Vidéo" sz="sm" onClick={()=>{if(vdInput){sF({...f,vd:[...(f.vd||[]),vdInput]});sVdInput('')}}}/>
+                </div>
+                <div className="space-y-2">
+                  {(f.vd||[]).map((url,i)=>(
+                    <div key={i} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                      <span className="flex-1 text-sm truncate">{url}</span>
+                      <button onClick={()=>sF({...f,vd:f.vd.filter((_,j)=>j!==i)})} className="text-red-500 hover:text-red-700">&times;</button>
+                    </div>
+                  ))}
+                </div>
+                {(!f.vd||f.vd.length===0)&&<p className="text-gray-400 text-sm">Aucune vidéo ajoutée</p>}
+              </div>
+
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1">Équipements</label>
                 <div className="flex gap-2 mb-2"><input value={feInput} onChange={e=>sFeInput(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" placeholder="Ex: Piscine"/><Btn ch="+" sz="sm" onClick={()=>{if(feInput){sF({...f,fe:[...f.fe,feInput]});sFeInput('')}}}/></div>
