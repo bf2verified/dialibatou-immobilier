@@ -149,15 +149,39 @@ const I={
 const Ic=({n,c="w-5 h-5"})=><svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">{I[n]}</svg>;
 
 // COMPONENTS
-const Logo=({l})=>(
-  <div className="flex items-center gap-2">
-    <Ic n="building" c={`w-8 h-8 ${l?'text-amber-400':'text-amber-500'}`}/>
-    <div className="flex flex-col">
-      <span className={`text-xl font-bold ${l?'text-white':'text-gray-900'}`}>DIALI<span className="text-amber-500">BATOU</span></span>
-      <span className={`text-xs font-medium tracking-widest ${l?'text-gray-300':'text-gray-600'}`}>BTP IMMOBILIER</span>
+const Logo=({l,sz="md"})=>{
+  const sizes={sm:"h-10",md:"h-12",lg:"h-16"};
+  return(
+    <div className="flex items-center gap-3">
+      <div className={`${sizes[sz]} aspect-square relative`}>
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <defs>
+            <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#F5D060"/><stop offset="50%" stopColor="#D4AF37"/><stop offset="100%" stopColor="#B8973A"/></linearGradient>
+            <linearGradient id="silver" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#E8E8E8"/><stop offset="50%" stopColor="#B0B0B0"/><stop offset="100%" stopColor="#808080"/></linearGradient>
+            <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#4A90D9"/><stop offset="100%" stopColor="#2C5F8A"/></linearGradient>
+          </defs>
+          <rect x="20" y="25" width="12" height="45" rx="1" fill="url(#blue)"/>
+          <rect x="35" y="15" width="14" height="55" rx="1" fill="url(#silver)"/>
+          <rect x="37" y="20" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
+          <rect x="42" y="20" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
+          <rect x="37" y="28" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
+          <rect x="42" y="28" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
+          <rect x="37" y="36" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
+          <rect x="42" y="36" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
+          <polygon points="55,35 75,35 85,55 55,55" fill="url(#silver)"/>
+          <polygon points="55,35 70,22 85,35" fill="url(#gold)"/>
+          <rect x="63" y="42" width="6" height="8" rx="0.5" fill="#555"/>
+          <rect x="73" y="40" width="5" height="6" rx="0.5" fill="#fff" opacity="0.5"/>
+          <ellipse cx="55" cy="72" rx="35" ry="8" fill="none" stroke="url(#gold)" strokeWidth="2.5"/>
+        </svg>
+      </div>
+      <div className="flex flex-col">
+        <span className={`font-bold ${sz==='lg'?'text-2xl':'text-xl'} ${l?'text-white':'text-gray-900'}`}>DIALI<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">BATOU</span></span>
+        <span className={`text-xs font-medium tracking-widest ${l?'text-gray-300':'text-gray-500'}`}>— BTP IMMOBILIER —</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Btn=({ch,v="primary",sz="md",cl="",onClick})=>{
   const vs={primary:"bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-lg",outline:"border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white",white:"bg-white text-gray-900 hover:bg-gray-100 shadow-lg",ghost:"text-gray-700 hover:bg-gray-100"};
@@ -208,7 +232,7 @@ const Header=({pg,sP})=>{
   const [mo,sMo]=useState(false);
   const [sc,sSc]=useState(false);
   useEffect(()=>{const h=()=>sSc(window.scrollY>50);window.addEventListener('scroll',h);return()=>window.removeEventListener('scroll',h)},[]);
-  const nav=[{id:'home',l:'Accueil'},{id:'properties',l:'Biens'},{id:'services',l:'Services'},{id:'contact',l:'Contact'}];
+  const nav=[{id:'home',l:'Accueil'},{id:'properties',l:'Biens'},{id:'cooperative',l:'Coopérative'},{id:'services',l:'Services'},{id:'contact',l:'Contact'}];
   return(
     <header className={`fixed top-0 left-0 right-0 z-40 transition-all ${sc?'bg-white shadow-lg':'bg-white/95 backdrop-blur-md'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -235,7 +259,7 @@ const Footer=({sP})=>(
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
         <div className="space-y-6"><Logo l/><p className="text-gray-400">Votre partenaire immobilier de confiance au Sénégal.</p></div>
-        <div><h4 className="text-lg font-bold mb-6">Navigation</h4><ul className="space-y-3">{['Accueil','Biens','Services','Contact'].map((i,x)=><li key={x}><button onClick={()=>sP(['home','properties','services','contact'][x])} className="text-gray-400 hover:text-amber-500 flex items-center gap-2"><Ic n="chevR" c="w-4 h-4"/>{i}</button></li>)}</ul></div>
+        <div><h4 className="text-lg font-bold mb-6">Navigation</h4><ul className="space-y-3">{['Accueil','Biens','Coopérative','Services','Contact'].map((i,x)=><li key={x}><button onClick={()=>sP(['home','properties','cooperative','services','contact'][x])} className="text-gray-400 hover:text-amber-500 flex items-center gap-2"><Ic n="chevR" c="w-4 h-4"/>{i}</button></li>)}</ul></div>
         <div><h4 className="text-lg font-bold mb-6">Services</h4><ul className="space-y-3">{['Achat & Vente','Location','Gestion','Construction'].map((i,x)=><li key={x} className="text-gray-400 flex items-start gap-2"><Ic n="check" c="w-4 h-4 mt-1 text-amber-500"/>{i}</li>)}</ul></div>
         <div><h4 className="text-lg font-bold mb-6">Contact</h4><ul className="space-y-4">
           <li className="flex items-start gap-3"><Ic n="map" c="w-5 h-5 text-amber-500 mt-1"/><span className="text-gray-400">{CO.addr}</span></li>
@@ -583,6 +607,187 @@ const Contact=()=>{
   </div>);
 };
 
+const Cooperative=({sP})=>{
+  const [formC,sFormC]=useState({na:'',em:'',ph:'',loc:'',ty:'',ms:''});
+  const [sentC,sSentC]=useState(false);
+  const hSub=e=>{
+    e.preventDefault();
+    const wa=`https://wa.me/${CO.wa}?text=${encodeURIComponent(`[COOPÉRATIVE D'HABITAT]\nNom: ${formC.na}\nEmail: ${formC.em}\nTél: ${formC.ph}\nLocalité souhaitée: ${formC.loc}\nType de logement: ${formC.ty}\nMessage: ${formC.ms}`)}`;
+    window.open(wa,'_blank');sSentC(true);
+  };
+  const plans=[
+    {n:"Terrain Viabilisé",pr:"À partir de 150 000 FCFA/mois",su:"150 à 300 m²",du:"24 mois",fe:["Terrain borné","Titre foncier","Eau & Électricité","Voirie aménagée"],pop:false},
+    {n:"Maison Économique",pr:"À partir de 250 000 FCFA/mois",su:"2 à 3 chambres",du:"36 mois",fe:["Terrain inclus","Construction clé en main","Titre foncier","Finitions complètes","Raccordements"],pop:true},
+    {n:"Villa Standing",pr:"À partir de 450 000 FCFA/mois",su:"3 à 4 chambres",du:"48 mois",fe:["Terrain 300m²+","Villa R+1","Finitions haut de gamme","Jardin & Parking","Titre foncier"],pop:false}
+  ];
+  const steps=[
+    {n:"01",t:"Adhésion",d:"Inscription à la coopérative avec un droit d'adhésion. Choix du plan et de la localité souhaitée."},
+    {n:"02",t:"Épargne mensuelle",d:"Versements mensuels réguliers selon votre plan. Votre épargne constitue votre apport personnel."},
+    {n:"03",t:"Acquisition terrain",d:"La coopérative négocie et acquiert les terrains en gros à des prix avantageux pour ses membres."},
+    {n:"04",t:"Construction",d:"Lancement de la construction par nos équipes BTP. Suivi qualité et respect des délais."},
+    {n:"05",t:"Livraison",d:"Remise des clés de votre logement avec titre foncier à votre nom. Vous êtes propriétaire !"}
+  ];
+  const faqs=[
+    {q:"Qui peut adhérer à la coopérative ?",a:"Toute personne physique majeure résidant au Sénégal ou à l'étranger (diaspora). Salariés, commerçants, entrepreneurs, fonctionnaires sont les bienvenus."},
+    {q:"Quel est le montant du droit d'adhésion ?",a:"Le droit d'adhésion est de 50 000 FCFA. Ce montant unique couvre les frais administratifs et vous donne accès à tous les avantages de la coopérative."},
+    {q:"Puis-je choisir ma localité ?",a:"Oui, vous choisissez parmi nos localités disponibles : Bambilor, Thiès, Diass, Bayakh, Keur Massar, Sébikotane, Kounoune, et bien d'autres."},
+    {q:"Que se passe-t-il si je ne peux plus payer ?",a:"Vous pouvez suspendre vos versements pendant 3 mois maximum. Au-delà, votre épargne vous est restituée déduction faite des frais de gestion (10%)."},
+    {q:"Le titre foncier est-il garanti ?",a:"Absolument. Tous nos terrains disposent d'un titre foncier ou d'un bail emphytéotique. Le transfert de propriété est effectué chez le notaire."},
+    {q:"Quand commence la construction ?",a:"La construction démarre dès que 70% du plan d'épargne est atteint. Les travaux durent entre 6 et 12 mois selon le type de logement."}
+  ];
+  const [openFaq,sOpenFaq]=useState(null);
+  return(<div className="min-h-screen bg-gray-50 pt-24">
+    {/* HERO */}
+    <div className="relative bg-gradient-to-r from-gray-900 to-gray-800 py-20 overflow-hidden">
+      <div className="absolute inset-0 opacity-20"><img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920" alt="" className="w-full h-full object-cover"/></div>
+      <div className="relative max-w-7xl mx-auto px-4 text-center">
+        <div className="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/30 rounded-full px-4 py-2 mb-6"><span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"/><span className="text-amber-400 text-sm font-medium">Devenez propriétaire</span></div>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Coopérative d'Habitat</h1>
+        <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">Accédez à la propriété grâce à l'épargne collective. Terrains viabilisés et logements construits à des prix imbattables.</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Btn ch={<><Ic n="arrR" c="w-5 h-5"/>Rejoindre la coopérative</>} sz="lg" onClick={()=>document.getElementById('coop-form').scrollIntoView({behavior:'smooth'})}/>
+          <Btn ch={<><Ic n="msg" c="w-5 h-5"/>WhatsApp</>} v="outline" sz="lg" cl="border-white text-white hover:bg-white hover:text-amber-600" onClick={()=>window.open(`https://wa.me/${CO.wa}?text=Bonjour, je souhaite des informations sur la coopérative d'habitat.`,'_blank')}/>
+        </div>
+      </div>
+    </div>
+
+    {/* AVANTAGES */}
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Pourquoi nous rejoindre</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Les avantages de la coopérative</h2></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            {i:"home",t:"Prix réduits",d:"Achat groupé de terrains = prix 30 à 50% moins cher que le marché"},
+            {i:"shield",t:"Sécurité juridique",d:"Titre foncier garanti, transactions notariées, zéro arnaque"},
+            {i:"users",t:"Force collective",d:"L'union fait la force : négociation, suivi, entraide entre membres"},
+            {i:"clock",t:"Épargne flexible",d:"Versements mensuels adaptés à votre budget, sans crédit bancaire"}
+          ].map((a,i)=><div key={i} className="text-center p-6 rounded-2xl bg-gray-50 hover:shadow-lg transition-all">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 mb-4"><Ic n={a.i} c="w-8 h-8"/></div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{a.t}</h3><p className="text-gray-600 text-sm">{a.d}</p>
+          </div>)}
+        </div>
+      </div>
+    </section>
+
+    {/* COMMENT ÇA MARCHE */}
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-16"><span className="text-amber-600 font-semibold uppercase tracking-wider">Processus</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Comment ça marche ?</h2></div>
+        <div className="relative">
+          <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-amber-200 -translate-y-1/2"/>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+            {steps.map((s,i)=><div key={i} className="relative text-center">
+              <div className="relative z-10 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xl font-bold mb-4 shadow-lg">{s.n}</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{s.t}</h3>
+              <p className="text-gray-600 text-sm">{s.d}</p>
+            </div>)}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* PLANS */}
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Nos offres</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Choisissez votre plan</h2></div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {plans.map((p,i)=><div key={i} className={`relative rounded-2xl p-8 ${p.pop?'bg-gradient-to-b from-amber-500 to-amber-600 text-white shadow-2xl scale-105':'bg-white border-2 border-gray-200 shadow-lg'}`}>
+            {p.pop&&<div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-white text-amber-600 px-4 py-1 rounded-full text-sm font-bold shadow">Populaire</div>}
+            <h3 className={`text-2xl font-bold mb-2 ${p.pop?'text-white':'text-gray-900'}`}>{p.n}</h3>
+            <p className={`text-lg font-semibold mb-1 ${p.pop?'text-amber-100':'text-amber-600'}`}>{p.pr}</p>
+            <p className={`text-sm mb-6 ${p.pop?'text-amber-200':'text-gray-500'}`}>{p.su} — Durée: {p.du}</p>
+            <ul className="space-y-3 mb-8">
+              {p.fe.map((f,x)=><li key={x} className="flex items-center gap-3">
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${p.pop?'bg-white/20':'bg-green-100'}`}><Ic n="check" c={`w-3 h-3 ${p.pop?'text-white':'text-green-600'}`}/></div>
+                <span className={p.pop?'text-white':'text-gray-700'}>{f}</span>
+              </li>)}
+            </ul>
+            <Btn ch="Choisir ce plan" v={p.pop?"white":"primary"} cl="w-full" onClick={()=>document.getElementById('coop-form').scrollIntoView({behavior:'smooth'})}/>
+          </div>)}
+        </div>
+      </div>
+    </section>
+
+    {/* LOCALITÉS DISPONIBLES */}
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Nos sites</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Localités disponibles</h2></div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {["Bambilor","Thiès","Diass","Bayakh","Keur Massar","Sébikotane","Kounoune","Pout","Sindia","Malikounda","Gorom","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Nguérigne","Keur Ndiaye Lo","Ndayane"].map((l,i)=><div key={i} className="bg-white rounded-xl p-4 text-center shadow hover:shadow-lg hover:border-amber-500 border-2 border-transparent transition-all cursor-pointer" onClick={()=>sP('properties')}>
+            <Ic n="map" c="w-5 h-5 text-amber-500 mx-auto mb-2"/>
+            <p className="text-sm font-medium text-gray-900">{l}</p>
+            <p className="text-xs text-gray-500">{P.filter(p=>p.nb===l).length} bien{P.filter(p=>p.nb===l).length>1?'s':''}</p>
+          </div>)}
+        </div>
+      </div>
+    </section>
+
+    {/* STATS COOPÉRATIVE */}
+    <section className="py-16 bg-gradient-to-r from-gray-900 to-gray-800">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          {[{v:"500+",l:"Membres actifs"},{v:"18",l:"Localités couvertes"},{v:"200+",l:"Logements livrés"},{v:"95%",l:"Taux de satisfaction"}].map((s,i)=><div key={i}><p className="text-3xl md:text-4xl font-bold text-amber-500">{s.v}</p><p className="text-gray-300 text-sm mt-1">{s.l}</p></div>)}
+        </div>
+      </div>
+    </section>
+
+    {/* FAQ */}
+    <section className="py-20 bg-white">
+      <div className="max-w-3xl mx-auto px-4">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">FAQ</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Questions fréquentes</h2></div>
+        <div className="space-y-4">
+          {faqs.map((f,i)=><div key={i} className="bg-gray-50 rounded-xl overflow-hidden">
+            <button onClick={()=>sOpenFaq(openFaq===i?null:i)} className="w-full flex items-center justify-between p-5 text-left">
+              <span className="font-semibold text-gray-900">{f.q}</span>
+              <Ic n={openFaq===i?"x":"chevR"} c="w-5 h-5 text-amber-500 flex-shrink-0"/>
+            </button>
+            {openFaq===i&&<div className="px-5 pb-5"><p className="text-gray-600">{f.a}</p></div>}
+          </div>)}
+        </div>
+      </div>
+    </section>
+
+    {/* FORMULAIRE D'INSCRIPTION */}
+    <section id="coop-form" className="py-20 bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Inscription</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Rejoindre la coopérative</h2><p className="text-gray-600 mt-4">Remplissez le formulaire ci-dessous et nous vous contacterons dans les 24h.</p></div>
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          {sentC?<div className="text-center py-12"><div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><Ic n="check" c="w-10 h-10 text-green-600"/></div><h3 className="text-2xl font-bold text-gray-900 mb-2">Demande envoyée !</h3><p className="text-gray-600 mb-4">Un conseiller vous contactera très bientôt.</p><Btn ch="Retour à l'accueil" onClick={()=>sP('home')}/></div>
+          :<form onSubmit={hSub} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div><label className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label><input type="text" required value={formC.na} onChange={e=>sFormC({...formC,na:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Votre nom complet"/></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-2">Email *</label><input type="email" required value={formC.em} onChange={e=>sFormC({...formC,em:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="votre@email.com"/></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div><label className="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label><input type="tel" required value={formC.ph} onChange={e=>sFormC({...formC,ph:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="+221 77 XXX XX XX"/></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-2">Localité souhaitée</label>
+                <select value={formC.loc} onChange={e=>sFormC({...formC,loc:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"><option value="">Choisir une localité</option>{NB.map(n=><option key={n} value={n}>{n}</option>)}</select>
+              </div>
+            </div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-2">Type de logement souhaité</label>
+              <select value={formC.ty} onChange={e=>sFormC({...formC,ty:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"><option value="">Choisir un plan</option><option value="Terrain Viabilisé">Terrain Viabilisé</option><option value="Maison Économique">Maison Économique</option><option value="Villa Standing">Villa Standing</option></select>
+            </div>
+            <div><label className="block text-sm font-medium text-gray-700 mb-2">Message (optionnel)</label><textarea rows={4} value={formC.ms} onChange={e=>sFormC({...formC,ms:e.target.value})} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Précisez vos besoins ou posez vos questions..."/></div>
+            <Btn ch={<><Ic n="arrR" c="w-5 h-5"/>Envoyer ma demande</>} sz="lg" cl="w-full"/>
+          </form>}
+        </div>
+      </div>
+    </section>
+
+    {/* CTA FINAL */}
+    <section className="py-16 bg-gradient-to-r from-amber-500 to-amber-600">
+      <div className="max-w-4xl mx-auto px-4 text-center">
+        <h2 className="text-3xl font-bold text-white mb-4">Besoin de plus d'informations ?</h2>
+        <p className="text-amber-100 mb-8">Appelez-nous ou envoyez un message WhatsApp</p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href={`tel:${CO.ph[0]}`}><Btn ch={<><Ic n="phone" c="w-5 h-5"/>{CO.ph[0]}</>} v="white" sz="lg"/></a>
+          <a href={`https://wa.me/${CO.wa}`} target="_blank" rel="noopener noreferrer"><Btn ch={<><Ic n="msg" c="w-5 h-5"/>WhatsApp</>} v="outline" sz="lg" cl="border-white text-white hover:bg-white hover:text-amber-600"/></a>
+        </div>
+      </div>
+    </section>
+  </div>);
+};
+
 const Locality=({loc,sP,sS,favs})=>{
   const props=P.filter(p=>p.nb===loc);
   const region=gR(loc);
@@ -624,6 +829,7 @@ const App=()=>{
       case 'home':return <Home sP={sPg} sS={sSel} favs={favs}/>;
       case 'properties':return <Props sP={sPg} sS={sSel} favs={favs}/>;
       case 'detail':return <Detail p={sel} sP={sPg}/>;
+      case 'cooperative':return <Cooperative sP={sPg}/>;
       case 'services':return <Serv sP={sPg}/>;
       case 'contact':return <Contact/>;
       case 'locality':return <Locality loc={loc} sP={sPg} sS={sSel} favs={favs}/>;
