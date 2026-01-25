@@ -332,8 +332,8 @@ const Footer=({sP})=>(
 );
 
 // PAGES
-const Home=({sP,sS,favs})=>{
-  const ft=P.filter(p=>p.ft).slice(0,6);
+const Home=({sP,sS,favs,props=P})=>{
+  const ft=props.filter(p=>p.ft).slice(0,6);
   return(<div>
     {/* HERO */}
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -422,7 +422,7 @@ const Home=({sP,sS,favs})=>{
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {REGIONS.map(rg=><div key={rg} className="bg-gray-50 rounded-2xl p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><Ic n="map" c="w-5 h-5 text-amber-500"/>{rg}</h3>
-            <div className="space-y-2">{NB.filter(n=>gR(n)===rg).map(n=><button key={n} onClick={()=>sP('properties')} className="block text-sm text-gray-600 hover:text-amber-600 hover:translate-x-1 transition-all">{n} <span className="text-gray-400">({P.filter(p=>p.nb===n).length})</span></button>)}</div>
+            <div className="space-y-2">{NB.filter(n=>gR(n)===rg).map(n=><button key={n} onClick={()=>sP('properties')} className="block text-sm text-gray-600 hover:text-amber-600 hover:translate-x-1 transition-all">{n} <span className="text-gray-400">({props.filter(p=>p.nb===n).length})</span></button>)}</div>
           </div>)}
         </div>
       </div>
@@ -465,13 +465,13 @@ const MapView=({properties,onV})=>{
   return <div ref={mapRef} style={{height:'500px',width:'100%'}}/>;
 };
 
-const Props=({sP,sS,favs})=>{
+const Props=({sP,sS,favs,props=P})=>{
   const [f,sF]=useState({ty:'',tr:'',nb:'',rg:'',pm:'',q:'',fav:false});
   const [so,sSo]=useState('');
   const [pg,sPg]=useState(1);
   const [view,sView]=useState('grid');
   const fl=useMemo(()=>{
-    let r=[...P];
+    let r=[...props];
     if(f.q){const q=f.q.toLowerCase();r=r.filter(p=>p.ti.toLowerCase().includes(q)||p.de.toLowerCase().includes(q)||p.nb.toLowerCase().includes(q))}
     if(f.ty)r=r.filter(p=>p.ty===f.ty);
     if(f.tr)r=r.filter(p=>p.tr===f.tr);
@@ -483,13 +483,13 @@ const Props=({sP,sS,favs})=>{
     if(so==='pd')r.sort((a,b)=>b.pr-a.pr);
     if(so==='vi')r.sort((a,b)=>b.vi-a.vi);
     return r;
-  },[f,so,favs.favs]);
+  },[f,so,favs.favs,props]);
   const totalPages=Math.ceil(fl.length/PER_PAGE);
   const paged=fl.slice((pg-1)*PER_PAGE,pg*PER_PAGE);
   useEffect(()=>{sPg(1)},[f,so]);
   const filteredNB=f.rg?NB.filter(n=>gR(n)===f.rg):NB;
   return(<div className="min-h-screen bg-gray-50 pt-24">
-    <div className="bg-gradient-to-r from-gray-900 to-gray-800 py-16"><div className="max-w-7xl mx-auto px-4"><h1 className="text-4xl font-bold text-white mb-4">Nos biens immobiliers</h1><p className="text-gray-300">{P.length} biens disponibles à Dakar et au Sénégal</p></div></div>
+    <div className="bg-gradient-to-r from-gray-900 to-gray-800 py-16"><div className="max-w-7xl mx-auto px-4"><h1 className="text-4xl font-bold text-white mb-4">Nos biens immobiliers</h1><p className="text-gray-300">{props.length} biens disponibles à Dakar et au Sénégal</p></div></div>
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <div className="relative mb-4">
@@ -666,7 +666,7 @@ const Contact=()=>{
   </div>);
 };
 
-const Cooperative=({sP,lots})=>{
+const Cooperative=({sP,lots,props=P})=>{
   const [formC,sFormC]=useState({na:'',em:'',ph:'',loc:'',ty:'',ms:''});
   const [sentC,sSentC]=useState(false);
   const hSub=e=>{
@@ -775,7 +775,7 @@ const Cooperative=({sP,lots})=>{
           {["Bambilor","Thiès","Diass","Bayakh","Keur Massar","Sébikotane","Kounoune","Pout","Sindia","Malikounda","Gorom","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Nguérigne","Keur Ndiaye Lo","Ndayane"].map((l,i)=><div key={i} className="bg-white rounded-xl p-4 text-center shadow hover:shadow-lg hover:border-amber-500 border-2 border-transparent transition-all cursor-pointer" onClick={()=>sP('properties')}>
             <Ic n="map" c="w-5 h-5 text-amber-500 mx-auto mb-2"/>
             <p className="text-sm font-medium text-gray-900">{l}</p>
-            <p className="text-xs text-gray-500">{P.filter(p=>p.nb===l).length} bien{P.filter(p=>p.nb===l).length>1?'s':''}</p>
+            <p className="text-xs text-gray-500">{props.filter(p=>p.nb===l).length} bien{props.filter(p=>p.nb===l).length>1?'s':''}</p>
           </div>)}
         </div>
       </div>
@@ -1217,8 +1217,8 @@ const Admin=({sP,data})=>{
   );
 };
 
-const Locality=({loc,sP,sS,favs})=>{
-  const props=P.filter(p=>p.nb===loc);
+const Locality=({loc,sP,sS,favs,props:allProps=P})=>{
+  const locProps=allProps.filter(p=>p.nb===loc);
   const region=gR(loc);
   const coord=COORDS[loc];
   const mapRef=useRef(null);
@@ -1226,21 +1226,21 @@ const Locality=({loc,sP,sS,favs})=>{
     if(!mapRef.current||!coord)return;
     const map=L.map(mapRef.current).setView(coord,13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'OpenStreetMap'}).addTo(map);
-    props.forEach(p=>{L.marker(coord).addTo(map).bindPopup(`<b>${p.ti}</b><br/>${fP(p.pr,p.tr)}`)});
+    locProps.forEach(p=>{L.marker(coord).addTo(map).bindPopup(`<b>${p.ti}</b><br/>${fP(p.pr,p.tr)}`)});
     return()=>map.remove();
-  },[loc]);
+  },[loc,locProps]);
   return(<div className="min-h-screen bg-gray-50 pt-24">
     <div className="bg-gradient-to-r from-gray-900 to-gray-800 py-16"><div className="max-w-7xl mx-auto px-4">
       <div className="flex items-center gap-2 text-sm text-gray-400 mb-4"><button onClick={()=>sP('home')} className="hover:text-amber-400">Accueil</button><Ic n="chevR" c="w-4 h-4"/><button onClick={()=>sP('properties')} className="hover:text-amber-400">Biens</button><Ic n="chevR" c="w-4 h-4"/><span className="text-white">{loc}</span></div>
       <h1 className="text-4xl font-bold text-white mb-2">Immobilier à {loc}</h1>
-      <p className="text-gray-300">{props.length} bien{props.length>1?'s':''} disponible{props.length>1?'s':''} - Région de {region}</p>
+      <p className="text-gray-300">{locProps.length} bien{locProps.length>1?'s':''} disponible{locProps.length>1?'s':''} - Région de {region}</p>
     </div></div>
     <div className="max-w-7xl mx-auto px-4 py-8">
       {coord&&<div className="mb-8 rounded-2xl overflow-hidden shadow-lg" style={{height:'250px'}}><div ref={mapRef} style={{height:'100%',width:'100%'}}/></div>}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {props.map(p=><Card key={p.id} p={p} onV={x=>{sS(x);sP('detail')}} isFav={favs.isFav(p.id)} toggleFav={favs.toggle}/>)}
+        {locProps.map(p=><Card key={p.id} p={p} onV={x=>{sS(x);sP('detail')}} isFav={favs.isFav(p.id)} toggleFav={favs.toggle}/>)}
       </div>
-      {props.length===0&&<div className="text-center py-16"><Ic n="building" c="w-16 h-16 text-gray-300 mx-auto mb-4"/><h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun bien disponible à {loc}</h3><Btn ch="Voir tous les biens" onClick={()=>sP('properties')}/></div>}
+      {locProps.length===0&&<div className="text-center py-16"><Ic n="building" c="w-16 h-16 text-gray-300 mx-auto mb-4"/><h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun bien disponible à {loc}</h3><Btn ch="Voir tous les biens" onClick={()=>sP('properties')}/></div>}
     </div>
   </div>);
 };
@@ -1257,15 +1257,15 @@ const App=()=>{
   const goLoc=(l)=>{sLoc(l);sPg('locality')};
   const rP=()=>{
     switch(pg){
-      case 'home':return <Home sP={sPg} sS={sSel} favs={favs}/>;
-      case 'properties':return <Props sP={sPg} sS={sSel} favs={favs}/>;
-      case 'detail':return <Detail p={sel} sP={sPg}/>;
-      case 'cooperative':return <Cooperative sP={sPg} lots={data.lots}/>;
+      case 'home':return <Home sP={sPg} sS={sSel} favs={favs} props={props}/>;
+      case 'properties':return <Props sP={sPg} sS={sSel} favs={favs} props={props}/>;
+      case 'detail':return <Detail p={sel} sP={sPg} props={props}/>;
+      case 'cooperative':return <Cooperative sP={sPg} lots={data.lots} props={props}/>;
       case 'services':return <Serv sP={sPg}/>;
       case 'contact':return <Contact/>;
-      case 'locality':return <Locality loc={loc} sP={sPg} sS={sSel} favs={favs}/>;
+      case 'locality':return <Locality loc={loc} sP={sPg} sS={sSel} favs={favs} props={props}/>;
       case 'admin':return <Admin sP={sPg} data={data}/>;
-      default:return <Home sP={sPg} sS={sSel} favs={favs}/>;
+      default:return <Home sP={sPg} sS={sSel} favs={favs} props={props}/>;
     }
   };
   return(<div className="min-h-screen bg-white">
