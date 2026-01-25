@@ -27,11 +27,44 @@
 const {useState,useEffect,useMemo,useRef,useCallback}=React;
 
 // CONFIG
-const CO={name:"DIALIBATOU BTP IMMOBILIER",addr:"Dakar Ouest, Foire – Cité Khandar, Villa 3",ph:["+221 77 709 61 44","+221 76 949 64 66"],email:"dialibatoubtp@gmail.com",wa:"221777096144",stats:{proj:250,cli:500,yrs:15,prop:180}};
+const CO={name:"DIALIBATOU BTP IMMOBILIER",addr:"Dakar Ouest, Foire – Cité Khandar, Villa 3",ph:["+221 77 709 61 44","+221 76 949 64 66"],email:"dialibatoubtp@gmail.com",wa:"221777096144",stats:{proj:250,cli:500,yrs:15,prop:180},adminPwd:"dialibatou2024"};
 const NB=["Almadies","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour","Thiès","Bambilor","Pout","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Yène","Toubab Dialao","Ndayane","Keur Massar","Diakhaye","Kounoune","Diass","Keur Ndiaye Lo","Sindia","Malikounda","Sébikotane","Nguérigne","Gorom","Bayakh"];
 const TY=["Appartement","Villa","Terrain","Bureau","Commerce"];
 
-// DATA - 20 Propriétés
+// TERRAINS LOTISSÉS COOPÉRATIVE (données initiales)
+const LOTS_INIT=[
+  {id:"lot1",loc:"Bambilor",zone:"Zone A",lots:50,dispo:35,su:200,pr:5000000,st:"Disponible",fe:["Titre foncier","Eau","Électricité","Voirie"]},
+  {id:"lot2",loc:"Thiès",zone:"Cité Dialibatou",lots:100,dispo:72,su:150,pr:3500000,st:"Disponible",fe:["Titre foncier","Eau","Électricité"]},
+  {id:"lot3",loc:"Diass",zone:"Proche AIBD",lots:80,dispo:45,su:250,pr:7000000,st:"Disponible",fe:["Titre foncier","Eau","Électricité","Proximité aéroport"]},
+  {id:"lot4",loc:"Bayakh",zone:"Lac Rose",lots:60,dispo:28,su:300,pr:6000000,st:"Disponible",fe:["Titre foncier","Eau","Vue lac"]},
+  {id:"lot5",loc:"Sébikotane",zone:"Zone industrielle",lots:40,dispo:15,su:200,pr:5500000,st:"Limité",fe:["Titre foncier","Eau","Électricité","Voirie"]},
+  {id:"lot6",loc:"Keur Massar",zone:"Extension",lots:120,dispo:89,su:150,pr:6500000,st:"Disponible",fe:["Titre foncier","Eau","Électricité","Transport"]},
+  {id:"lot7",loc:"Kounoune",zone:"Résidentielle",lots:45,dispo:20,su:200,pr:4500000,st:"Limité",fe:["Titre foncier","Eau","Électricité"]},
+  {id:"lot8",loc:"Sindia",zone:"Village",lots:70,dispo:55,su:350,pr:4000000,st:"Disponible",fe:["Délibération","Eau"]}
+];
+
+// Fonction pour charger/sauvegarder les données
+const loadData=(key,defaultVal)=>{try{const d=localStorage.getItem(`dialibatou_${key}`);return d?JSON.parse(d):defaultVal}catch{return defaultVal}};
+const saveData=(key,data)=>{localStorage.setItem(`dialibatou_${key}`,JSON.stringify(data))};
+
+// Hook pour gérer les données dynamiques
+const useData=()=>{
+  const [properties,setProperties]=useState(()=>loadData('properties',null));
+  const [lots,setLots]=useState(()=>loadData('lots',LOTS_INIT));
+  const [initialized,setInit]=useState(false);
+
+  useEffect(()=>{
+    if(!initialized&&properties===null){setInit(true)}
+  },[]);
+
+  const updateProps=(newProps)=>{saveData('properties',newProps);setProperties(newProps)};
+  const updateLots=(newLots)=>{saveData('lots',newLots);setLots(newLots)};
+  const resetData=()=>{localStorage.removeItem('dialibatou_properties');localStorage.removeItem('dialibatou_lots');setProperties(null);setLots(LOTS_INIT)};
+
+  return {properties,lots,updateProps,updateLots,resetData,hasCustomData:properties!==null};
+};
+
+// DATA - Propriétés par défaut
 const P=[
   {id:"p1",ti:"Luxueux Appartement Vue Mer Almadies",de:"Superbe appartement de standing avec vue imprenable sur l'océan. Résidence sécurisée, finitions haut de gamme. 3 chambres, terrasse 25m².",ty:"Appartement",tr:"Vente",pr:185000000,nb:"Almadies",su:180,ro:5,be:3,ba:2,fe:["Piscine","Parking","Sécurité 24h","Vue mer"],im:["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800","https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800"],ft:true,vi:342,ag:{na:"Amadou Diallo",ph:"+221 77 709 61 44"}},
   {id:"p2",ti:"Appartement Moderne 4P Mermoz",de:"Magnifique appartement contemporain entièrement rénové. Salon double avec balcon, cuisine équipée, chambres climatisées.",ty:"Appartement",tr:"Vente",pr:125000000,nb:"Mermoz",su:140,ro:4,be:3,ba:2,fe:["Parking","Climatisation","Balcon"],im:["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800","https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800"],ft:true,vi:256,ag:{na:"Fatou Sow",ph:"+221 76 949 64 66"}},
@@ -268,7 +301,7 @@ const Footer=({sP})=>(
         </ul></div>
       </div>
     </div>
-    <div className="border-t border-gray-800"><div className="max-w-7xl mx-auto px-4 py-6 text-center text-gray-400 text-sm">© {new Date().getFullYear()} {CO.name}. Tous droits réservés.</div></div>
+    <div className="border-t border-gray-800"><div className="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-gray-400 text-sm"><span>© {new Date().getFullYear()} {CO.name}. Tous droits réservés.</span><button onClick={()=>sP('admin')} className="hover:text-amber-500 flex items-center gap-1"><Ic n="shield" c="w-4 h-4"/>Administration</button></div></div>
   </footer>
 );
 
@@ -607,7 +640,7 @@ const Contact=()=>{
   </div>);
 };
 
-const Cooperative=({sP})=>{
+const Cooperative=({sP,lots})=>{
   const [formC,sFormC]=useState({na:'',em:'',ph:'',loc:'',ty:'',ms:''});
   const [sentC,sSentC]=useState(false);
   const hSub=e=>{
@@ -722,6 +755,38 @@ const Cooperative=({sP})=>{
       </div>
     </section>
 
+    {/* TERRAINS LOTISSÉS */}
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Lotissements</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Terrains Lotissés Disponibles</h2><p className="text-gray-600 mt-4 max-w-2xl mx-auto">Parcelles viabilisées prêtes à construire dans nos différentes zones. Titre foncier garanti.</p></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {lots.map((lot,i)=><div key={lot.id} className="bg-white border-2 border-gray-100 rounded-2xl overflow-hidden hover:border-amber-500 hover:shadow-xl transition-all">
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-white font-bold text-lg">{lot.loc}</span>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${lot.st==='Disponible'?'bg-green-100 text-green-700':'bg-orange-100 text-orange-700'}`}>{lot.st}</span>
+              </div>
+              <p className="text-amber-100 text-sm">{lot.zone}</p>
+            </div>
+            <div className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div><p className="text-2xl font-bold text-amber-600">{(lot.pr/1000000).toFixed(1)} M</p><p className="text-xs text-gray-500">FCFA/parcelle</p></div>
+                <div className="text-right"><p className="text-2xl font-bold text-gray-900">{lot.su}</p><p className="text-xs text-gray-500">m²/lot</p></div>
+              </div>
+              <div className="flex items-center justify-between py-3 border-t border-b border-gray-100 mb-4">
+                <div className="text-center"><p className="text-lg font-bold text-gray-900">{lot.lots}</p><p className="text-xs text-gray-500">Total lots</p></div>
+                <div className="text-center"><p className="text-lg font-bold text-green-600">{lot.dispo}</p><p className="text-xs text-gray-500">Disponibles</p></div>
+                <div className="text-center"><p className="text-lg font-bold text-gray-400">{lot.lots-lot.dispo}</p><p className="text-xs text-gray-500">Réservés</p></div>
+              </div>
+              <div className="space-y-2 mb-4">{lot.fe.slice(0,3).map((f,x)=><div key={x} className="flex items-center gap-2 text-sm text-gray-600"><Ic n="check" c="w-4 h-4 text-green-500"/>{f}</div>)}{lot.fe.length>3&&<p className="text-xs text-gray-400">+{lot.fe.length-3} autres</p>}</div>
+              <Btn ch="Réserver un lot" cl="w-full" onClick={()=>document.getElementById('coop-form').scrollIntoView({behavior:'smooth'})}/>
+            </div>
+          </div>)}
+        </div>
+        {lots.length===0&&<div className="text-center py-12"><Ic n="map" c="w-16 h-16 text-gray-300 mx-auto mb-4"/><p className="text-gray-500">Aucun lotissement disponible pour le moment</p></div>}
+      </div>
+    </section>
+
     {/* STATS COOPÉRATIVE */}
     <section className="py-16 bg-gradient-to-r from-gray-900 to-gray-800">
       <div className="max-w-7xl mx-auto px-4">
@@ -788,6 +853,258 @@ const Cooperative=({sP})=>{
   </div>);
 };
 
+// ADMIN INTERFACE
+const Admin=({sP,data})=>{
+  const [auth,sAuth]=useState(()=>sessionStorage.getItem('dialibatou_admin')==='true');
+  const [pwd,sPwd]=useState('');
+  const [err,sErr]=useState('');
+  const [tab,sTab]=useState('dashboard');
+  const [editProp,sEditProp]=useState(null);
+  const [editLot,sEditLot]=useState(null);
+  const [props,setProps]=useState(data.properties||P);
+  const [lots,setLots]=useState(data.lots);
+
+  const login=()=>{if(pwd===CO.adminPwd){sAuth(true);sessionStorage.setItem('dialibatou_admin','true');sErr('')}else{sErr('Mot de passe incorrect')}};
+  const logout=()=>{sAuth(false);sessionStorage.removeItem('dialibatou_admin')};
+
+  const saveProp=(p)=>{
+    const newProps=editProp?.id?props.map(x=>x.id===p.id?p:x):[...props,{...p,id:'p'+Date.now()}];
+    setProps(newProps);data.updateProps(newProps);sEditProp(null);
+  };
+  const delProp=(id)=>{if(confirm('Supprimer cette propriété ?')){const newProps=props.filter(x=>x.id!==id);setProps(newProps);data.updateProps(newProps)}};
+
+  const saveLot=(l)=>{
+    const newLots=editLot?.id?lots.map(x=>x.id===l.id?l:x):[...lots,{...l,id:'lot'+Date.now()}];
+    setLots(newLots);data.updateLots(newLots);sEditLot(null);
+  };
+  const delLot=(id)=>{if(confirm('Supprimer ce lotissement ?')){const newLots=lots.filter(x=>x.id!==id);setLots(newLots);data.updateLots(newLots)}};
+
+  const exportData=()=>{
+    const d={properties:props,lots};
+    const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='dialibatou_data.json';a.click();
+  };
+  const importData=(e)=>{
+    const f=e.target.files[0];if(!f)return;
+    const reader=new FileReader();
+    reader.onload=(ev)=>{
+      try{
+        const d=JSON.parse(ev.target.result);
+        if(d.properties){setProps(d.properties);data.updateProps(d.properties)}
+        if(d.lots){setLots(d.lots);data.updateLots(d.lots)}
+        alert('Données importées avec succès !');
+      }catch{alert('Erreur: fichier invalide')}
+    };reader.readAsText(f);
+  };
+
+  // Login screen
+  if(!auth)return(
+    <div className="min-h-screen bg-gray-100 pt-24 flex items-center justify-center">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="text-center mb-8"><Logo sz="lg"/><h1 className="text-2xl font-bold text-gray-900 mt-4">Administration</h1><p className="text-gray-500">Connectez-vous pour gérer le site</p></div>
+        <div className="space-y-4">
+          <div><label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label><input type="password" value={pwd} onChange={e=>sPwd(e.target.value)} onKeyDown={e=>e.key==='Enter'&&login()} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500" placeholder="Entrez le mot de passe"/></div>
+          {err&&<p className="text-red-500 text-sm">{err}</p>}
+          <Btn ch="Se connecter" cl="w-full" onClick={login}/>
+          <button onClick={()=>sP('home')} className="w-full text-center text-gray-500 hover:text-amber-600 text-sm">Retour au site</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Property form
+  const PropForm=({p,onSave,onCancel})=>{
+    const [f,sF]=useState(p||{ti:'',de:'',ty:'Appartement',tr:'Vente',pr:0,nb:'',su:0,ro:0,be:0,ba:0,fe:[],im:[''],ft:false,vi:0,ag:{na:'Amadou Diallo',ph:CO.ph[0]}});
+    const [feInput,sFeInput]=useState('');
+    return(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b sticky top-0 bg-white"><h3 className="text-xl font-bold">{p?'Modifier':'Ajouter'} une propriété</h3></div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2"><label className="block text-sm font-medium mb-1">Titre *</label><input value={f.ti} onChange={e=>sF({...f,ti:e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Ex: Villa Moderne Almadies"/></div>
+              <div className="md:col-span-2"><label className="block text-sm font-medium mb-1">Description</label><textarea value={f.de} onChange={e=>sF({...f,de:e.target.value})} rows={3} className="w-full px-3 py-2 border rounded-lg" placeholder="Description détaillée..."/></div>
+              <div><label className="block text-sm font-medium mb-1">Type</label><select value={f.ty} onChange={e=>sF({...f,ty:e.target.value})} className="w-full px-3 py-2 border rounded-lg">{TY.map(t=><option key={t}>{t}</option>)}</select></div>
+              <div><label className="block text-sm font-medium mb-1">Transaction</label><select value={f.tr} onChange={e=>sF({...f,tr:e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option>Vente</option><option>Location</option></select></div>
+              <div><label className="block text-sm font-medium mb-1">Prix (FCFA)</label><input type="number" value={f.pr} onChange={e=>sF({...f,pr:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Localité</label><select value={f.nb} onChange={e=>sF({...f,nb:e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option value="">Choisir</option>{NB.map(n=><option key={n}>{n}</option>)}</select></div>
+              <div><label className="block text-sm font-medium mb-1">Surface (m²)</label><input type="number" value={f.su} onChange={e=>sF({...f,su:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Pièces</label><input type="number" value={f.ro} onChange={e=>sF({...f,ro:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Chambres</label><input type="number" value={f.be} onChange={e=>sF({...f,be:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Salles de bain</label><input type="number" value={f.ba} onChange={e=>sF({...f,ba:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div className="md:col-span-2"><label className="block text-sm font-medium mb-1">URL Image</label><input value={f.im[0]} onChange={e=>sF({...f,im:[e.target.value]})} className="w-full px-3 py-2 border rounded-lg" placeholder="https://images.unsplash.com/..."/></div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Équipements</label>
+                <div className="flex gap-2 mb-2"><input value={feInput} onChange={e=>sFeInput(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" placeholder="Ex: Piscine"/><Btn ch="+" sz="sm" onClick={()=>{if(feInput){sF({...f,fe:[...f.fe,feInput]});sFeInput('')}}}/></div>
+                <div className="flex flex-wrap gap-2">{f.fe.map((x,i)=><span key={i} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-2">{x}<button onClick={()=>sF({...f,fe:f.fe.filter((_,j)=>j!==i)})} className="text-red-500">&times;</button></span>)}</div>
+              </div>
+              <div className="flex items-center gap-2"><input type="checkbox" checked={f.ft} onChange={e=>sF({...f,ft:e.target.checked})} id="ft"/><label htmlFor="ft" className="text-sm">Propriété en vedette (Premium)</label></div>
+            </div>
+          </div>
+          <div className="p-6 border-t flex gap-3 justify-end">
+            <Btn ch="Annuler" v="ghost" onClick={onCancel}/>
+            <Btn ch={p?'Mettre à jour':'Ajouter'} onClick={()=>{if(!f.ti||!f.nb){alert('Titre et localité requis');return}onSave(f)}}/>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Lot form
+  const LotForm=({l,onSave,onCancel})=>{
+    const [f,sF]=useState(l||{loc:'',zone:'',lots:0,dispo:0,su:0,pr:0,st:'Disponible',fe:[]});
+    const [feInput,sFeInput]=useState('');
+    return(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="p-6 border-b"><h3 className="text-xl font-bold">{l?'Modifier':'Ajouter'} un lotissement</h3></div>
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label className="block text-sm font-medium mb-1">Localité *</label><select value={f.loc} onChange={e=>sF({...f,loc:e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option value="">Choisir</option>{NB.map(n=><option key={n}>{n}</option>)}</select></div>
+              <div><label className="block text-sm font-medium mb-1">Zone/Nom</label><input value={f.zone} onChange={e=>sF({...f,zone:e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Ex: Zone A, Cité Dialibatou"/></div>
+              <div><label className="block text-sm font-medium mb-1">Nombre total de lots</label><input type="number" value={f.lots} onChange={e=>sF({...f,lots:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Lots disponibles</label><input type="number" value={f.dispo} onChange={e=>sF({...f,dispo:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Surface par lot (m²)</label><input type="number" value={f.su} onChange={e=>sF({...f,su:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Prix par lot (FCFA)</label><input type="number" value={f.pr} onChange={e=>sF({...f,pr:+e.target.value})} className="w-full px-3 py-2 border rounded-lg"/></div>
+              <div><label className="block text-sm font-medium mb-1">Statut</label><select value={f.st} onChange={e=>sF({...f,st:e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option>Disponible</option><option>Limité</option><option>Épuisé</option></select></div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Caractéristiques</label>
+                <div className="flex gap-2 mb-2"><input value={feInput} onChange={e=>sFeInput(e.target.value)} className="flex-1 px-3 py-2 border rounded-lg" placeholder="Ex: Titre foncier"/><Btn ch="+" sz="sm" onClick={()=>{if(feInput){sF({...f,fe:[...f.fe,feInput]});sFeInput('')}}}/></div>
+                <div className="flex flex-wrap gap-2">{f.fe.map((x,i)=><span key={i} className="bg-gray-100 px-3 py-1 rounded-full text-sm flex items-center gap-2">{x}<button onClick={()=>sF({...f,fe:f.fe.filter((_,j)=>j!==i)})} className="text-red-500">&times;</button></span>)}</div>
+              </div>
+            </div>
+          </div>
+          <div className="p-6 border-t flex gap-3 justify-end">
+            <Btn ch="Annuler" v="ghost" onClick={onCancel}/>
+            <Btn ch={l?'Mettre à jour':'Ajouter'} onClick={()=>{if(!f.loc){alert('Localité requise');return}onSave(f)}}/>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Admin Dashboard
+  return(
+    <div className="min-h-screen bg-gray-100 pt-20">
+      {editProp!==null&&<PropForm p={editProp.id?editProp:null} onSave={saveProp} onCancel={()=>sEditProp(null)}/>}
+      {editLot!==null&&<LotForm l={editLot.id?editLot:null} onSave={saveLot} onCancel={()=>sEditLot(null)}/>}
+
+      <div className="bg-white border-b shadow-sm sticky top-20 z-30">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-bold text-gray-900">Administration</h1>
+            <div className="flex gap-1">
+              {[{id:'dashboard',l:'Tableau de bord',i:'home'},{id:'properties',l:'Propriétés',i:'building'},{id:'lots',l:'Lotissements',i:'map'}].map(t=>
+                <button key={t.id} onClick={()=>sTab(t.id)} className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${tab===t.id?'bg-amber-100 text-amber-700':'text-gray-600 hover:bg-gray-100'}`}><Ic n={t.i} c="w-4 h-4"/><span className="hidden sm:inline">{t.l}</span></button>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={()=>sP('home')} className="text-gray-500 hover:text-amber-600 text-sm">Voir le site</button>
+            <Btn ch="Déconnexion" v="ghost" sz="sm" onClick={logout}/>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Dashboard */}
+        {tab==='dashboard'&&<div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[{l:'Propriétés',v:props.length,i:'building',c:'bg-blue-500'},{l:'Lotissements',v:lots.length,i:'map',c:'bg-green-500'},{l:'Lots disponibles',v:lots.reduce((a,l)=>a+l.dispo,0),i:'check',c:'bg-amber-500'},{l:'En vedette',v:props.filter(p=>p.ft).length,i:'star',c:'bg-purple-500'}].map((s,i)=>
+              <div key={i} className="bg-white rounded-xl p-6 shadow-sm">
+                <div className={`w-12 h-12 ${s.c} rounded-lg flex items-center justify-center mb-4`}><Ic n={s.i} c="w-6 h-6 text-white"/></div>
+                <p className="text-3xl font-bold text-gray-900">{s.v}</p>
+                <p className="text-gray-500 text-sm">{s.l}</p>
+              </div>
+            )}
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Actions rapides</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button onClick={()=>{sTab('properties');sEditProp({})}} className="p-4 border-2 border-dashed rounded-xl hover:border-amber-500 hover:bg-amber-50 transition-all text-left">
+                <Ic n="building" c="w-8 h-8 text-amber-500 mb-2"/>
+                <p className="font-semibold text-gray-900">Ajouter une propriété</p>
+                <p className="text-sm text-gray-500">Villa, appartement, terrain...</p>
+              </button>
+              <button onClick={()=>{sTab('lots');sEditLot({})}} className="p-4 border-2 border-dashed rounded-xl hover:border-green-500 hover:bg-green-50 transition-all text-left">
+                <Ic n="map" c="w-8 h-8 text-green-500 mb-2"/>
+                <p className="font-semibold text-gray-900">Ajouter un lotissement</p>
+                <p className="text-sm text-gray-500">Terrains coopérative...</p>
+              </button>
+              <button onClick={exportData} className="p-4 border-2 border-dashed rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all text-left">
+                <Ic n="arrR" c="w-8 h-8 text-blue-500 mb-2"/>
+                <p className="font-semibold text-gray-900">Exporter les données</p>
+                <p className="text-sm text-gray-500">Sauvegarde JSON...</p>
+              </button>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Import/Export</h3>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1"><label className="block text-sm font-medium text-gray-700 mb-2">Importer des données</label><input type="file" accept=".json" onChange={importData} className="w-full text-sm"/></div>
+              <div className="flex-1"><label className="block text-sm font-medium text-gray-700 mb-2">Exporter les données</label><Btn ch="Télécharger JSON" v="outline" onClick={exportData}/></div>
+              <div className="flex-1"><label className="block text-sm font-medium text-gray-700 mb-2">Réinitialiser</label><Btn ch="Données par défaut" v="ghost" onClick={()=>{if(confirm('Réinitialiser toutes les données ?')){data.resetData();setProps(P);setLots(LOTS_INIT)}}}/></div>
+            </div>
+          </div>
+        </div>}
+
+        {/* Properties management */}
+        {tab==='properties'&&<div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">Propriétés ({props.length})</h2>
+            <Btn ch={<><Ic n="building" c="w-4 h-4"/>Ajouter</>} onClick={()=>sEditProp({})}/>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50"><tr><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Propriété</th><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 hidden md:table-cell">Type</th><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Prix</th><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 hidden sm:table-cell">Localité</th><th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Actions</th></tr></thead>
+              <tbody className="divide-y">
+                {props.map(p=><tr key={p.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3"><div className="flex items-center gap-3">{p.im?.[0]&&<img src={p.im[0]} className="w-12 h-12 rounded-lg object-cover"/>}<div><p className="font-medium text-gray-900 line-clamp-1">{p.ti}</p>{p.ft&&<span className="text-xs text-amber-600">Premium</span>}</div></div></td>
+                  <td className="px-4 py-3 hidden md:table-cell"><span className="px-2 py-1 bg-gray-100 rounded-full text-xs">{p.ty}</span></td>
+                  <td className="px-4 py-3 font-semibold text-amber-600">{fP(p.pr,p.tr)}</td>
+                  <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{p.nb}</td>
+                  <td className="px-4 py-3 text-right"><div className="flex items-center justify-end gap-2"><button onClick={()=>sEditProp(p)} className="p-2 hover:bg-amber-100 rounded-lg text-amber-600"><Ic n="hammer" c="w-4 h-4"/></button><button onClick={()=>delProp(p.id)} className="p-2 hover:bg-red-100 rounded-lg text-red-600"><Ic n="x" c="w-4 h-4"/></button></div></td>
+                </tr>)}
+              </tbody>
+            </table>
+            {props.length===0&&<div className="p-12 text-center text-gray-500">Aucune propriété. Cliquez sur "Ajouter" pour commencer.</div>}
+          </div>
+        </div>}
+
+        {/* Lots management */}
+        {tab==='lots'&&<div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">Lotissements ({lots.length})</h2>
+            <Btn ch={<><Ic n="map" c="w-4 h-4"/>Ajouter</>} onClick={()=>sEditLot({})}/>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {lots.map(l=><div key={l.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-green-500 to-green-600 p-4 flex items-center justify-between">
+                <div><p className="text-white font-bold">{l.loc}</p><p className="text-green-100 text-sm">{l.zone}</p></div>
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${l.st==='Disponible'?'bg-white/20 text-white':'bg-orange-100 text-orange-700'}`}>{l.st}</span>
+              </div>
+              <div className="p-4">
+                <div className="grid grid-cols-3 gap-4 text-center mb-4">
+                  <div><p className="text-xl font-bold">{l.lots}</p><p className="text-xs text-gray-500">Total</p></div>
+                  <div><p className="text-xl font-bold text-green-600">{l.dispo}</p><p className="text-xs text-gray-500">Dispo</p></div>
+                  <div><p className="text-xl font-bold">{l.su}m²</p><p className="text-xs text-gray-500">Surface</p></div>
+                </div>
+                <p className="text-amber-600 font-bold mb-4">{(l.pr/1000000).toFixed(1)} M FCFA/lot</p>
+                <div className="flex gap-2">
+                  <Btn ch="Modifier" v="outline" sz="sm" cl="flex-1" onClick={()=>sEditLot(l)}/>
+                  <button onClick={()=>delLot(l.id)} className="p-2 hover:bg-red-100 rounded-lg text-red-600"><Ic n="x" c="w-4 h-4"/></button>
+                </div>
+              </div>
+            </div>)}
+          </div>
+          {lots.length===0&&<div className="bg-white rounded-xl p-12 text-center text-gray-500">Aucun lotissement. Cliquez sur "Ajouter" pour commencer.</div>}
+        </div>}
+      </div>
+    </div>
+  );
+};
+
 const Locality=({loc,sP,sS,favs})=>{
   const props=P.filter(p=>p.nb===loc);
   const region=gR(loc);
@@ -822,6 +1139,8 @@ const App=()=>{
   const [sel,sSel]=useState(null);
   const [loc,sLoc]=useState(null);
   const favs=useFavs();
+  const data=useData();
+  const props=data.properties||P;
   useEffect(()=>{window.scrollTo(0,0)},[pg]);
   const goLoc=(l)=>{sLoc(l);sPg('locality')};
   const rP=()=>{
@@ -829,17 +1148,18 @@ const App=()=>{
       case 'home':return <Home sP={sPg} sS={sSel} favs={favs}/>;
       case 'properties':return <Props sP={sPg} sS={sSel} favs={favs}/>;
       case 'detail':return <Detail p={sel} sP={sPg}/>;
-      case 'cooperative':return <Cooperative sP={sPg}/>;
+      case 'cooperative':return <Cooperative sP={sPg} lots={data.lots}/>;
       case 'services':return <Serv sP={sPg}/>;
       case 'contact':return <Contact/>;
       case 'locality':return <Locality loc={loc} sP={sPg} sS={sSel} favs={favs}/>;
+      case 'admin':return <Admin sP={sPg} data={data}/>;
       default:return <Home sP={sPg} sS={sSel} favs={favs}/>;
     }
   };
   return(<div className="min-h-screen bg-white">
-    <Header pg={pg} sP={sPg}/>
+    {pg!=='admin'&&<Header pg={pg} sP={sPg}/>}
     <main>{rP()}</main>
-    <Footer sP={sPg}/>
+    {pg!=='admin'&&<Footer sP={sPg}/>}
     <button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} className="fixed bottom-6 right-6 p-3 bg-amber-500 text-white rounded-full shadow-lg hover:bg-amber-600 transition-colors z-30"><Ic n="arrU" c="w-6 h-6"/></button>
   </div>);
 };
