@@ -75,8 +75,8 @@ const {useState,useEffect,useMemo,useRef,useCallback}=React;
 
 // CONFIG
 const CO={name:"DIALIBATOU BTP IMMOBILIER",addr:"Dakar Ouest, Foire – Cité Khandar, Villa 3",ph:["+221 77 709 61 44","+221 76 949 64 66"],email:"dialibatoubtp@gmail.com",wa:"221777096144",stats:{proj:250,cli:500,yrs:15,prop:180},adminPwd:"dialibatou2024"};
-const NB=["Almadies","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour","Thiès","Bambilor","Pout","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Yène","Toubab Dialao","Ndayane","Keur Massar","Diakhaye","Kounoune","Diass","Keur Ndiaye Lo","Sindia","Malikounda","Sébikotane","Nguérigne","Gorom","Bayakh","Keur Moussa"];
-const TY=["Appartement","Villa","Terrain","Bureau","Commerce"];
+const NB=["Almadies","Almadies 2","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour","Thiès","Bambilor","Pout","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Yène","Toubab Dialao","Ndayane","Keur Massar","Diakhaye","Kounoune","Diass","Keur Ndiaye Lo","Sindia","Malikounda","Sébikotane","Nguérigne","Gorom","Bayakh","Keur Moussa"];
+const TY=["Appartement","Villa","Terrain","Bureau","Commerce","Magasin","Studio"];
 
 // TERRAINS LOTISSÉS COOPÉRATIVE (données initiales)
 const LOTS_INIT=[
@@ -99,6 +99,16 @@ const useData=()=>{
   const [properties,setProperties]=useState(()=>loadData('properties',null));
   const [lots,setLots]=useState(()=>loadData('lots',LOTS_INIT));
   const [initialized,setInit]=useState(false);
+
+  // Écouter les changements de localStorage (pour synchronisation entre onglets)
+  useEffect(()=>{
+    const handleStorage=(e)=>{
+      if(e.key==='dialibatou_properties'){setProperties(e.newValue?JSON.parse(e.newValue):null)}
+      if(e.key==='dialibatou_lots'){setLots(e.newValue?JSON.parse(e.newValue):LOTS_INIT)}
+    };
+    window.addEventListener('storage',handleStorage);
+    return()=>window.removeEventListener('storage',handleStorage);
+  },[]);
 
   useEffect(()=>{
     if(!initialized&&properties===null){setInit(true)}
@@ -187,7 +197,7 @@ const P=[
 ];
 
 // COORDINATES pour la carte
-const COORDS={"Almadies":[14.745,-17.522],"Mermoz":[14.707,-17.473],"Plateau":[14.669,-17.438],"Ouakam":[14.724,-17.491],"Ngor":[14.748,-17.518],"Point E":[14.697,-17.465],"Fann":[14.694,-17.457],"Sacré-Cœur":[14.715,-17.458],"Liberté":[14.705,-17.450],"Mamelles":[14.732,-17.505],"Yoff":[14.755,-17.478],"Keur Massar":[14.768,-17.317],"Gorom":[14.746,-17.332],"Bambilor":[14.732,-17.215],"Tivaouane Peulh":[14.770,-17.295],"Ndoukhoura Peulh":[14.760,-17.280],"Niagues":[14.710,-17.230],"Niacourap":[14.680,-17.240],"Sébikotane":[14.740,-17.140],"Diakhaye":[14.735,-17.310],"Kounoune":[14.760,-17.260],"Keur Ndiaye Lo":[14.750,-17.270],"Bayakh":[14.785,-17.240],"Thiès":[14.789,-16.926],"Pout":[14.767,-17.059],"Sindia":[14.581,-17.053],"Diass":[14.670,-17.070],"Malikounda":[14.470,-17.010],"Nguérigne":[14.450,-16.980],"Saly":[14.448,-17.015],"Mbour":[14.419,-16.964],"Toubab Dialao":[14.630,-17.170],"Ndayane":[14.640,-17.130],"Yène":[14.660,-17.170]};
+const COORDS={"Almadies":[14.745,-17.522],"Almadies 2":[14.742,-17.518],"Mermoz":[14.707,-17.473],"Plateau":[14.669,-17.438],"Ouakam":[14.724,-17.491],"Ngor":[14.748,-17.518],"Point E":[14.697,-17.465],"Fann":[14.694,-17.457],"Sacré-Cœur":[14.715,-17.458],"Liberté":[14.705,-17.450],"Mamelles":[14.732,-17.505],"Yoff":[14.755,-17.478],"Keur Massar":[14.768,-17.317],"Gorom":[14.746,-17.332],"Bambilor":[14.732,-17.215],"Tivaouane Peulh":[14.770,-17.295],"Ndoukhoura Peulh":[14.760,-17.280],"Niagues":[14.710,-17.230],"Niacourap":[14.680,-17.240],"Sébikotane":[14.740,-17.140],"Diakhaye":[14.735,-17.310],"Kounoune":[14.760,-17.260],"Keur Ndiaye Lo":[14.750,-17.270],"Bayakh":[14.785,-17.240],"Thiès":[14.789,-16.926],"Pout":[14.767,-17.059],"Sindia":[14.581,-17.053],"Diass":[14.670,-17.070],"Malikounda":[14.470,-17.010],"Nguérigne":[14.450,-16.980],"Saly":[14.448,-17.015],"Mbour":[14.419,-16.964],"Toubab Dialao":[14.630,-17.170],"Ndayane":[14.640,-17.130],"Yène":[14.660,-17.170]};
 
 // TESTIMONIALS
 const TE=[
@@ -200,9 +210,12 @@ const TE=[
 // UTILS
 const REGIONS=["Dakar","Rufisque","Thiès","Petite Côte"];
 const fP=(p,t)=>p>=1e6?`${(p/1e6).toFixed(0)} M FCFA${t==="Location"?"/mois":""}`:`${p.toLocaleString('fr-FR')} FCFA${t==="Location"?"/mois":""}`;
-const RG={"Almadies":"Dakar","Mermoz":"Dakar","Plateau":"Dakar","Ouakam":"Dakar","Ngor":"Dakar","Point E":"Dakar","Fann":"Dakar","Sacré-Cœur":"Dakar","Liberté":"Dakar","Mamelles":"Dakar","Yoff":"Dakar","Keur Massar":"Dakar","Gorom":"Dakar","Bambilor":"Rufisque","Tivaouane Peulh":"Rufisque","Ndoukhoura Peulh":"Rufisque","Niagues":"Rufisque","Niacourap":"Rufisque","Sébikotane":"Rufisque","Diakhaye":"Rufisque","Kounoune":"Rufisque","Keur Ndiaye Lo":"Rufisque","Bayakh":"Rufisque","Thiès":"Thiès","Pout":"Thiès","Sindia":"Thiès","Diass":"Thiès","Malikounda":"Petite Côte","Nguérigne":"Petite Côte","Saly":"Petite Côte","Mbour":"Petite Côte","Toubab Dialao":"Petite Côte","Ndayane":"Petite Côte","Yène":"Petite Côte"};
+const RG={"Almadies":"Dakar","Almadies 2":"Dakar","Mermoz":"Dakar","Plateau":"Dakar","Ouakam":"Dakar","Ngor":"Dakar","Point E":"Dakar","Fann":"Dakar","Sacré-Cœur":"Dakar","Liberté":"Dakar","Mamelles":"Dakar","Yoff":"Dakar","Keur Massar":"Dakar","Gorom":"Dakar","Bambilor":"Rufisque","Tivaouane Peulh":"Rufisque","Ndoukhoura Peulh":"Rufisque","Niagues":"Rufisque","Niacourap":"Rufisque","Sébikotane":"Rufisque","Diakhaye":"Rufisque","Kounoune":"Rufisque","Keur Ndiaye Lo":"Rufisque","Bayakh":"Rufisque","Thiès":"Thiès","Pout":"Thiès","Sindia":"Thiès","Diass":"Thiès","Malikounda":"Petite Côte","Nguérigne":"Petite Côte","Saly":"Petite Côte","Mbour":"Petite Côte","Toubab Dialao":"Petite Côte","Ndayane":"Petite Côte","Yène":"Petite Côte"};
 const gR=(nb)=>RG[nb]||"Sénégal";
 const PER_PAGE=12;
+// Fonction pour obtenir les vues dynamiques
+const getViews=(id)=>{try{const v=JSON.parse(localStorage.getItem('dialibatou_views')||'{}');return v[id]||0}catch{return 0}};
+const addView=(id)=>{try{const v=JSON.parse(localStorage.getItem('dialibatou_views')||'{}');v[id]=(v[id]||0)+1;localStorage.setItem('dialibatou_views',JSON.stringify(v));return v[id]}catch{return 0}};
 const useFavs=()=>{
   const [favs,setFavs]=useState(()=>{try{return JSON.parse(localStorage.getItem('dialibatou_favs'))||[]}catch{return[]}});
   const toggle=(id)=>{const n=favs.includes(id)?favs.filter(f=>f!==id):[...favs,id];setFavs(n);localStorage.setItem('dialibatou_favs',JSON.stringify(n))};
@@ -287,6 +300,7 @@ const Badge=({ch,v="default"})=>{
 
 const Card=({p,onV,isFav,toggleFav})=>{
   const [i,sI]=useState(0);
+  const totalViews = (p.vi||0) + getViews(p.id);
   return(
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -311,7 +325,7 @@ const Card=({p,onV,isFav,toggleFav})=>{
         </div>}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <Badge ch={p.ty}/>
-          <span className="flex items-center text-gray-400 text-sm"><Ic n="eye" c="w-4 h-4 mr-1"/>{p.vi}</span>
+          <span className="flex items-center text-gray-400 text-sm"><Ic n="eye" c="w-4 h-4 mr-1"/>{totalViews}</span>
         </div>
         <Btn ch={<>Voir détails<Ic n="arrR" c="w-4 h-4"/></>} v="outline" cl="w-full mt-4" onClick={()=>onV(p)}/>
       </div>
@@ -601,13 +615,13 @@ const Detail=({p,sP})=>{
   const [showGallery,setShowGallery]=useState(false);
   const [galleryTab,setGalleryTab]=useState('photos');
   const [playingVideo,setPlayingVideo]=useState(null);
+  const [currentViews,setCurrentViews]=useState(0);
 
-  // Incrémenter les vues
+  // Incrémenter les vues à chaque visite
   useEffect(()=>{
     if(p){
-      const views=JSON.parse(localStorage.getItem('dialibatou_views')||'{}');
-      views[p.id]=(views[p.id]||0)+1;
-      localStorage.setItem('dialibatou_views',JSON.stringify(views));
+      const newViews = addView(p.id);
+      setCurrentViews((p.vi||0) + newViews);
     }
   },[p?.id]);
 
@@ -1065,6 +1079,10 @@ const Admin=({sP,data})=>{
   const [editLot,sEditLot]=useState(null);
   const [props,setProps]=useState(data.properties||P);
   const [lots,setLots]=useState(data.lots);
+
+  // Synchroniser avec les données globales quand elles changent
+  useEffect(()=>{setProps(data.properties||P)},[data.properties]);
+  useEffect(()=>{setLots(data.lots)},[data.lots]);
 
   const login=()=>{if(pwd===CO.adminPwd){sAuth(true);sessionStorage.setItem('dialibatou_admin','true');sErr('')}else{sErr('Mot de passe incorrect')}};
   const logout=()=>{sAuth(false);sessionStorage.removeItem('dialibatou_admin')};
