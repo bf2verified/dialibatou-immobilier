@@ -75,6 +75,10 @@ const {useState,useEffect,useMemo,useRef,useCallback}=React;
 
 // CONFIG
 const CO={name:"DIALIBATOU BTP IMMOBILIER",addr:"Dakar Ouest, Foire – Cité Khandar, Villa 3",ph:["+221 77 709 61 44","+221 76 949 64 66"],email:"dialibatoubtp@gmail.com",wa:"221777096144",stats:{proj:250,cli:500,yrs:15,prop:180},adminPwd:"dialibatou2024"};
+// Image par défaut pour les propriétés sans photos
+const DEFAULT_IMG="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop";
+// Fonction utilitaire pour obtenir les images avec fallback
+const getImages=(p)=>(p.im && p.im.length > 0) ? p.im : [DEFAULT_IMG];
 const NB=["Almadies","Almadies 2","Mermoz","Plateau","Ouakam","Ngor","Point E","Fann","Sacré-Cœur","Liberté","Mamelles","Yoff","Saly","Mbour","Thiès","Bambilor","Pout","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Yène","Toubab Dialao","Ndayane","Keur Massar","Diakhaye","Kounoune","Diass","Keur Ndiaye Lo","Sindia","Malikounda","Sébikotane","Nguérigne","Gorom","Bayakh","Keur Moussa"];
 const TY=["Appartement","Villa","Terrain","Bureau","Commerce","Magasin","Studio"];
 
@@ -98,7 +102,7 @@ const saveData=(key,data)=>{localStorage.setItem(`dialibatou_${key}`,JSON.string
 const useData=()=>{
   const [properties,setProperties]=useState(()=>loadData('properties',null));
   const [lots,setLots]=useState(()=>loadData('lots',LOTS_INIT));
-  const [initialized,setInit]=useState(false);
+  const [refreshKey,setRefreshKey]=useState(0);
 
   // Écouter les changements de localStorage (pour synchronisation entre onglets)
   useEffect(()=>{
@@ -110,15 +114,41 @@ const useData=()=>{
     return()=>window.removeEventListener('storage',handleStorage);
   },[]);
 
-  useEffect(()=>{
-    if(!initialized&&properties===null){setInit(true)}
+  // Rafraîchir les données depuis localStorage
+  const refresh=useCallback(()=>{
+    setProperties(loadData('properties',null));
+    setLots(loadData('lots',LOTS_INIT));
+    setRefreshKey(k=>k+1);
   },[]);
 
-  const updateProps=(newProps)=>{saveData('properties',newProps);setProperties(newProps)};
-  const updateLots=(newLots)=>{saveData('lots',newLots);setLots(newLots)};
-  const resetData=()=>{localStorage.removeItem('dialibatou_properties');localStorage.removeItem('dialibatou_lots');setProperties(null);setLots(LOTS_INIT)};
+  const updateProps=(newProps)=>{
+    // Valider et nettoyer les propriétés avant de sauvegarder
+    const cleanProps=newProps.map(p=>({
+      ...p,
+      im:p.im||[],
+      fe:p.fe||[],
+      vd:p.vd||[],
+      vi:p.vi||0,
+      ag:p.ag||{na:'Mame Cheikh Ndiaye',ph:CO.ph[0]}
+    }));
+    saveData('properties',cleanProps);
+    setProperties(cleanProps);
+    // Dispatch storage event pour synchroniser avec d'autres composants
+    window.dispatchEvent(new StorageEvent('storage',{key:'dialibatou_properties',newValue:JSON.stringify(cleanProps)}));
+  };
+  const updateLots=(newLots)=>{
+    saveData('lots',newLots);
+    setLots(newLots);
+    window.dispatchEvent(new StorageEvent('storage',{key:'dialibatou_lots',newValue:JSON.stringify(newLots)}));
+  };
+  const resetData=()=>{
+    localStorage.removeItem('dialibatou_properties');
+    localStorage.removeItem('dialibatou_lots');
+    setProperties(null);
+    setLots(LOTS_INIT);
+  };
 
-  return {properties,lots,updateProps,updateLots,resetData,hasCustomData:properties!==null};
+  return {properties,lots,updateProps,updateLots,resetData,refresh,hasCustomData:properties!==null,refreshKey};
 };
 
 // Hook pour le mode sombre
@@ -301,13 +331,14 @@ const Badge=({ch,v="default"})=>{
 const Card=({p,onV,isFav,toggleFav})=>{
   const [i,sI]=useState(0);
   const totalViews = (p.vi||0) + getViews(p.id);
+  const images = getImages(p);
   return(
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-2xl transition-all">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img src={p.im[i]} alt={p.ti} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
-        {p.im.length>1&&<>
-          <button onClick={e=>{e.stopPropagation();sI(x=>x>0?x-1:p.im.length-1)}} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100"><Ic n="chevL" c="w-4 h-4"/></button>
-          <button onClick={e=>{e.stopPropagation();sI(x=>x<p.im.length-1?x+1:0)}} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100"><Ic n="chevR" c="w-4 h-4"/></button>
+        <img src={images[i] || DEFAULT_IMG} alt={p.ti} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+        {images.length>1&&<>
+          <button onClick={e=>{e.stopPropagation();sI(x=>x>0?x-1:images.length-1)}} className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100"><Ic n="chevL" c="w-4 h-4"/></button>
+          <button onClick={e=>{e.stopPropagation();sI(x=>x<images.length-1?x+1:0)}} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 rounded-full opacity-0 group-hover:opacity-100"><Ic n="chevR" c="w-4 h-4"/></button>
         </>}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           <Badge ch={p.tr==="Vente"?"À VENDRE":"À LOUER"} v={p.tr==="Vente"?"sale":"rent"}/>
@@ -554,7 +585,7 @@ const Props=({sP,sS,favs,props=P})=>{
   const [view,sView]=useState('grid');
   const fl=useMemo(()=>{
     let r=[...props];
-    if(f.q){const q=f.q.toLowerCase();r=r.filter(p=>p.ti.toLowerCase().includes(q)||p.de.toLowerCase().includes(q)||p.nb.toLowerCase().includes(q))}
+    if(f.q){const q=f.q.toLowerCase();r=r.filter(p=>(p.ti||'').toLowerCase().includes(q)||(p.de||'').toLowerCase().includes(q)||(p.nb||'').toLowerCase().includes(q))}
     if(f.ty)r=r.filter(p=>p.ty===f.ty);
     if(f.tr)r=r.filter(p=>p.tr===f.tr);
     if(f.rg)r=r.filter(p=>gR(p.nb)===f.rg);
@@ -627,6 +658,7 @@ const Detail=({p,sP})=>{
 
   if(!p)return<div className="min-h-screen flex items-center justify-center pt-24"><p>Non trouvé</p><Btn ch="Retour" cl="mt-4" onClick={()=>sP('properties')}/></div>;
 
+  const images=getImages(p);
   const videos=p.vd||[];
   const getYouTubeId=(url)=>{const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&]+)/);return m?m[1]:null};
 
@@ -635,7 +667,7 @@ const Detail=({p,sP})=>{
     {showGallery&&<div className="fixed inset-0 bg-black z-50 flex flex-col">
       <div className="flex items-center justify-between p-4 bg-black/50">
         <div className="flex gap-2">
-          <button onClick={()=>setGalleryTab('photos')} className={`px-4 py-2 rounded-lg font-medium ${galleryTab==='photos'?'bg-amber-500 text-white':'bg-white/20 text-white'}`}>Photos ({p.im.length})</button>
+          <button onClick={()=>setGalleryTab('photos')} className={`px-4 py-2 rounded-lg font-medium ${galleryTab==='photos'?'bg-amber-500 text-white':'bg-white/20 text-white'}`}>Photos ({images.length})</button>
           {videos.length>0&&<button onClick={()=>setGalleryTab('videos')} className={`px-4 py-2 rounded-lg font-medium ${galleryTab==='videos'?'bg-amber-500 text-white':'bg-white/20 text-white'}`}>Vidéos ({videos.length})</button>}
         </div>
         <button onClick={()=>{setShowGallery(false);setPlayingVideo(null)}} className="p-2 bg-white/20 rounded-full hover:bg-white/30"><Ic n="x" c="w-6 h-6 text-white"/></button>
@@ -643,12 +675,12 @@ const Detail=({p,sP})=>{
       <div className="flex-1 flex items-center justify-center p-4">
         {galleryTab==='photos'?(
           <div className="relative w-full h-full flex items-center justify-center">
-            <img src={p.im[i]} alt={p.ti} className="max-w-full max-h-full object-contain"/>
-            {p.im.length>1&&<>
-              <button onClick={()=>sI(x=>x>0?x-1:p.im.length-1)} className="absolute left-4 p-3 bg-white/20 rounded-full hover:bg-white/40"><Ic n="chevL" c="w-8 h-8 text-white"/></button>
-              <button onClick={()=>sI(x=>x<p.im.length-1?x+1:0)} className="absolute right-4 p-3 bg-white/20 rounded-full hover:bg-white/40"><Ic n="chevR" c="w-8 h-8 text-white"/></button>
+            <img src={images[i] || DEFAULT_IMG} alt={p.ti} className="max-w-full max-h-full object-contain"/>
+            {images.length>1&&<>
+              <button onClick={()=>sI(x=>x>0?x-1:images.length-1)} className="absolute left-4 p-3 bg-white/20 rounded-full hover:bg-white/40"><Ic n="chevL" c="w-8 h-8 text-white"/></button>
+              <button onClick={()=>sI(x=>x<images.length-1?x+1:0)} className="absolute right-4 p-3 bg-white/20 rounded-full hover:bg-white/40"><Ic n="chevR" c="w-8 h-8 text-white"/></button>
             </>}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white">{i+1} / {p.im.length}</div>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white">{i+1} / {images.length}</div>
           </div>
         ):(
           <div className="w-full max-w-4xl">
@@ -680,9 +712,9 @@ const Detail=({p,sP})=>{
           </div>
         )}
       </div>
-      {galleryTab==='photos'&&p.im.length>1&&<div className="p-4 bg-black/50">
+      {galleryTab==='photos'&&images.length>1&&<div className="p-4 bg-black/50">
         <div className="flex gap-2 justify-center overflow-x-auto pb-2">
-          {p.im.map((im,x)=><button key={x} onClick={()=>sI(x)} className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 ${x===i?'border-amber-500':'border-transparent'}`}><img src={im} className="w-full h-full object-cover"/></button>)}
+          {images.map((im,x)=><button key={x} onClick={()=>sI(x)} className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 ${x===i?'border-amber-500':'border-transparent'}`}><img src={im} className="w-full h-full object-cover"/></button>)}
         </div>
       </div>}
     </div>}
@@ -691,17 +723,17 @@ const Detail=({p,sP})=>{
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="grid grid-cols-4 gap-4 mb-8">
         <div className="col-span-4 md:col-span-3 relative aspect-[16/10] rounded-2xl overflow-hidden cursor-pointer group" onClick={()=>setShowGallery(true)}>
-          <img src={p.im[i]} alt={p.ti} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
+          <img src={images[i] || DEFAULT_IMG} alt={p.ti} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"/>
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
             <span className="bg-white/90 px-4 py-2 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-opacity">Voir la galerie</span>
           </div>
-          {p.im.length>1&&<><button onClick={(e)=>{e.stopPropagation();sI(x=>x>0?x-1:p.im.length-1)}} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 rounded-full hover:bg-white"><Ic n="chevL" c="w-6 h-6"/></button><button onClick={(e)=>{e.stopPropagation();sI(x=>x<p.im.length-1?x+1:0)}} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 rounded-full hover:bg-white"><Ic n="chevR" c="w-6 h-6"/></button></>}
+          {images.length>1&&<><button onClick={(e)=>{e.stopPropagation();sI(x=>x>0?x-1:images.length-1)}} className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 rounded-full hover:bg-white"><Ic n="chevL" c="w-6 h-6"/></button><button onClick={(e)=>{e.stopPropagation();sI(x=>x<images.length-1?x+1:0)}} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white/80 rounded-full hover:bg-white"><Ic n="chevR" c="w-6 h-6"/></button></>}
           <div className="absolute bottom-4 left-4 flex gap-2">
-            <span className="bg-black/60 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1"><Ic n="building" c="w-4 h-4"/>{p.im.length} photos</span>
+            <span className="bg-black/60 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1"><Ic n="building" c="w-4 h-4"/>{images.length} photos</span>
             {videos.length>0&&<span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm flex items-center gap-1"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>{videos.length} vidéo{videos.length>1?'s':''}</span>}
           </div>
         </div>
-        <div className="col-span-4 md:col-span-1 grid grid-cols-4 md:grid-cols-1 gap-2">{p.im.slice(0,4).map((im,x)=><div key={x} className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${x===i?'ring-2 ring-amber-500':''}`} onClick={()=>sI(x)}><img src={im} alt="" className="w-full h-full object-cover hover:scale-110 transition-transform"/>{x===3&&p.im.length>4&&<div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold">+{p.im.length-4}</div>}</div>)}</div>
+        <div className="col-span-4 md:col-span-1 grid grid-cols-4 md:grid-cols-1 gap-2">{images.slice(0,4).map((im,x)=><div key={x} className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${x===i?'ring-2 ring-amber-500':''}`} onClick={()=>sI(x)}><img src={im} alt="" className="w-full h-full object-cover hover:scale-110 transition-transform"/>{x===3&&images.length>4&&<div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-bold">+{images.length-4}</div>}</div>)}</div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
@@ -718,7 +750,7 @@ const Detail=({p,sP})=>{
             </div>}
           </div>
           <div className="bg-white rounded-2xl shadow-lg p-6"><h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2><p className="text-gray-600 leading-relaxed">{p.de}</p></div>
-          {p.fe.length>0&&<div className="bg-white rounded-2xl shadow-lg p-6"><h2 className="text-xl font-bold text-gray-900 mb-4">Équipements</h2><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{p.fe.map((f,x)=><div key={x} className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"><Ic n="check" c="w-5 h-5 text-green-600"/></div><span className="text-gray-700">{f}</span></div>)}</div></div>}
+          {(p.fe||[]).length>0&&<div className="bg-white rounded-2xl shadow-lg p-6"><h2 className="text-xl font-bold text-gray-900 mb-4">Équipements</h2><div className="grid grid-cols-2 md:grid-cols-3 gap-4">{(p.fe||[]).map((f,x)=><div key={x} className="flex items-center gap-3"><div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center"><Ic n="check" c="w-5 h-5 text-green-600"/></div><span className="text-gray-700">{f}</span></div>)}</div></div>}
           {/* Section Vidéos */}
           {videos.length>0&&<div className="bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"><svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/><path fill="white" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Vidéos du bien</h2>
@@ -743,8 +775,8 @@ const Detail=({p,sP})=>{
         <div className="space-y-6">
           <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Votre conseiller</h3>
-            <div className="flex items-center gap-4 mb-6"><div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center"><Ic n="users" c="w-8 h-8 text-amber-600"/></div><div><p className="font-bold text-gray-900">{p.ag.na}</p><p className="text-sm text-gray-500">Expert immobilier</p></div></div>
-            <div className="space-y-3 mb-6"><a href={`tel:${p.ag.ph}`} className="flex items-center gap-3 text-gray-700 hover:text-amber-600"><Ic n="phone" c="w-5 h-5"/>{p.ag.ph}</a></div>
+            <div className="flex items-center gap-4 mb-6"><div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center"><Ic n="users" c="w-8 h-8 text-amber-600"/></div><div><p className="font-bold text-gray-900">{(p.ag||{}).na||'Mame Cheikh Ndiaye'}</p><p className="text-sm text-gray-500">Expert immobilier</p></div></div>
+            <div className="space-y-3 mb-6"><a href={`tel:${(p.ag||{}).ph||CO.ph[0]}`} className="flex items-center gap-3 text-gray-700 hover:text-amber-600"><Ic n="phone" c="w-5 h-5"/>{(p.ag||{}).ph||CO.ph[0]}</a></div>
             <div className="space-y-3">
               <Btn ch={<><Ic n="cal" c="w-5 h-5"/>Demander une visite</>} cl="w-full" onClick={()=>sP('contact')}/>
               <a href={`https://wa.me/${CO.wa}?text=Bonjour, je suis intéressé par: ${p.ti}`} target="_blank" rel="noopener noreferrer" className="block"><Btn ch={<><Ic n="msg" c="w-5 h-5"/>WhatsApp</>} v="outline" cl="w-full bg-green-50 border-green-500 text-green-700 hover:bg-green-100"/></a>
@@ -1366,7 +1398,7 @@ const Admin=({sP,data})=>{
               <thead className="bg-gray-50"><tr><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Propriété</th><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 hidden md:table-cell">Type</th><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Prix</th><th className="px-4 py-3 text-left text-sm font-semibold text-gray-900 hidden sm:table-cell">Localité</th><th className="px-4 py-3 text-right text-sm font-semibold text-gray-900">Actions</th></tr></thead>
               <tbody className="divide-y">
                 {props.map(p=><tr key={p.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3"><div className="flex items-center gap-3">{p.im?.[0]&&<img src={p.im[0]} className="w-12 h-12 rounded-lg object-cover"/>}<div><p className="font-medium text-gray-900 line-clamp-1">{p.ti}</p>{p.ft&&<span className="text-xs text-amber-600">Premium</span>}</div></div></td>
+                  <td className="px-4 py-3"><div className="flex items-center gap-3"><img src={getImages(p)[0]} className="w-12 h-12 rounded-lg object-cover"/><div><p className="font-medium text-gray-900 line-clamp-1">{p.ti}</p>{p.ft&&<span className="text-xs text-amber-600">Premium</span>}</div></div></td>
                   <td className="px-4 py-3 hidden md:table-cell"><span className="px-2 py-1 bg-gray-100 rounded-full text-xs">{p.ty}</span></td>
                   <td className="px-4 py-3 font-semibold text-amber-600">{fP(p.pr,p.tr)}</td>
                   <td className="px-4 py-3 text-gray-500 hidden sm:table-cell">{p.nb}</td>
@@ -1505,7 +1537,7 @@ const StatsTab=({props,lots})=>{
         <div className="space-y-3">{topViewed.map((p,i)=>(
           <div key={p.id} className="flex items-center gap-3">
             <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-sm font-bold">{i+1}</span>
-            {p.im?.[0]&&<img src={p.im[0]} className="w-10 h-10 rounded-lg object-cover"/>}
+            <img src={getImages(p)[0]} className="w-10 h-10 rounded-lg object-cover"/>
             <div className="flex-1 min-w-0"><p className="font-medium text-gray-900 truncate">{p.ti}</p><p className="text-sm text-gray-500">{p.nb}</p></div>
             <span className="text-amber-600 font-semibold">{views[p.id]||0} vues</span>
           </div>
