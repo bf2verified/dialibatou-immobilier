@@ -414,7 +414,7 @@ const Footer=({sP})=>(
 );
 
 // PAGES
-const Home=({sP,sS,favs,props=P})=>{
+const Home=({sP,sS,favs,props=P,goLoc})=>{
   const ft=props.filter(p=>p.ft).slice(0,6);
   return(<div>
     {/* HERO */}
@@ -504,7 +504,7 @@ const Home=({sP,sS,favs,props=P})=>{
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {REGIONS.map(rg=><div key={rg} className="bg-gray-50 rounded-2xl p-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><Ic n="map" c="w-5 h-5 text-amber-500"/>{rg}</h3>
-            <div className="space-y-2">{NB.filter(n=>gR(n)===rg).map(n=><button key={n} onClick={()=>sP('properties')} className="block text-sm text-gray-600 hover:text-amber-600 hover:translate-x-1 transition-all">{n} <span className="text-gray-400">({props.filter(p=>p.nb===n).length})</span></button>)}</div>
+            <div className="space-y-2">{NB.filter(n=>gR(n)===rg).map(n=><button key={n} onClick={()=>goLoc(n)} className="block text-sm text-gray-600 hover:text-amber-600 hover:translate-x-1 transition-all">{n} <span className="text-gray-400">({props.filter(p=>p.nb===n).length})</span></button>)}</div>
           </div>)}
         </div>
       </div>
@@ -856,7 +856,7 @@ const Contact=()=>{
   </div>);
 };
 
-const Cooperative=({sP,lots,props=P})=>{
+const Cooperative=({sP,lots,props=P,goLoc})=>{
   const [formC,sFormC]=useState({na:'',em:'',ph:'',loc:'',ty:'',ms:''});
   const [sentC,sSentC]=useState(false);
   const hSub=e=>{
@@ -962,7 +962,7 @@ const Cooperative=({sP,lots,props=P})=>{
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-12"><span className="text-amber-600 font-semibold uppercase tracking-wider">Nos sites</span><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">Localités disponibles</h2></div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {["Bambilor","Thiès","Diass","Bayakh","Keur Massar","Sébikotane","Kounoune","Pout","Sindia","Malikounda","Gorom","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Nguérigne","Keur Ndiaye Lo","Ndayane"].map((l,i)=><div key={i} className="bg-white rounded-xl p-4 text-center shadow hover:shadow-lg hover:border-amber-500 border-2 border-transparent transition-all cursor-pointer" onClick={()=>sP('properties')}>
+          {["Bambilor","Thiès","Diass","Bayakh","Keur Massar","Sébikotane","Kounoune","Pout","Sindia","Malikounda","Gorom","Tivaouane Peulh","Ndoukhoura Peulh","Niagues","Niacourap","Nguérigne","Keur Ndiaye Lo","Ndayane"].map((l,i)=><div key={i} className="bg-white rounded-xl p-4 text-center shadow hover:shadow-lg hover:border-amber-500 border-2 border-transparent transition-all cursor-pointer" onClick={()=>goLoc(l)}>
             <Ic n="map" c="w-5 h-5 text-amber-500 mx-auto mb-2"/>
             <p className="text-sm font-medium text-gray-900">{l}</p>
             <p className="text-xs text-gray-500">{props.filter(p=>p.nb===l).length} bien{props.filter(p=>p.nb===l).length>1?'s':''}</p>
@@ -1574,10 +1574,10 @@ const App=()=>{
   const goLoc=(l)=>{sLoc(l);sPg('locality')};
   const rP=()=>{
     switch(pg){
-      case 'home':return <Home sP={sPg} sS={sSel} favs={favs} props={props}/>;
+      case 'home':return <Home sP={sPg} sS={sSel} favs={favs} props={props} goLoc={goLoc}/>;
       case 'properties':return <Props sP={sPg} sS={sSel} favs={favs} props={props}/>;
       case 'detail':return <Detail p={sel} sP={sPg} props={props}/>;
-      case 'cooperative':return <Cooperative sP={sPg} lots={data.lots} props={props}/>;
+      case 'cooperative':return <Cooperative sP={sPg} lots={data.lots} props={props} goLoc={goLoc}/>;
       case 'services':return <Serv sP={sPg}/>;
       case 'contact':return <Contact/>;
       case 'locality':return <Locality loc={loc} sP={sPg} sS={sSel} favs={favs} props={props}/>;
