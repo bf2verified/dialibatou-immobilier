@@ -4,7 +4,11 @@
 Le site DIALIBATOU BTP IMMOBILIER stockait toutes les données (propriétés, lotissements) dans le **localStorage du navigateur**. Conséquence : les fichiers/données ajoutés par l'admin n'étaient visibles que sur SON navigateur, pas pour les visiteurs du site.
 
 ## Solution Implémentée
-Migration vers une architecture **Backend API + MongoDB** pour stocker les données côté serveur.
+1. **Mode Hybride** : Le code supporte maintenant deux modes :
+   - **Mode API** : Utilise un backend FastAPI + MongoDB (données persistantes côté serveur)
+   - **Mode Local** : Utilise localStorage (mode par défaut pour Vercel/GitHub Pages)
+
+2. **Nouveau Logo** : Logo officiel DIALIBATOU BTP IMMOBILIER remplacé
 
 ---
 
@@ -12,91 +16,75 @@ Migration vers une architecture **Backend API + MongoDB** pour stocker les donn�
 
 ### Stack
 - **Frontend**: React (via CDN) + Tailwind CSS - Fichier HTML unique
-- **Backend**: FastAPI (Python)
-- **Base de données**: MongoDB
-- **Ports**: Frontend :3000, Backend :8001
+- **Backend (optionnel)**: FastAPI (Python) + MongoDB
+- **Hébergement actuel**: Vercel (site statique)
 
-### Endpoints API
+### Configuration API
+Dans le fichier `index.html`, modifier cette ligne :
+```javascript
+window.REACT_APP_BACKEND_URL = ''; // Vide = mode localStorage
+// window.REACT_APP_BACKEND_URL = 'https://votre-api.render.com'; // Mode API
+```
+
+### Endpoints API (si backend déployé)
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
-| GET | /api/health | Health check |
 | GET | /api/properties | Liste des propriétés |
 | POST | /api/properties | Ajouter une propriété |
 | PUT | /api/properties/{id} | Modifier une propriété |
 | DELETE | /api/properties/{id} | Supprimer une propriété |
 | GET | /api/lots | Liste des lotissements |
-| POST | /api/lots | Ajouter un lotissement |
-| PUT | /api/lots/{id} | Modifier un lotissement |
-| DELETE | /api/lots/{id} | Supprimer un lotissement |
-| POST | /api/reset | Réinitialiser les données |
+| POST/PUT/DELETE | /api/lots/{id} | CRUD lotissements |
 
 ---
 
-## Fonctionnalités Implémentées
+## Fichiers Modifiés
 
-### Core (Complétées)
-- [x] API REST pour propriétés (CRUD)
-- [x] API REST pour lotissements (CRUD)
-- [x] Stockage MongoDB persistant
-- [x] Interface admin avec authentification (mot de passe: dialibatou2024)
-- [x] Ajout/modification/suppression de propriétés via admin
-- [x] Upload d'images (Base64)
-- [x] Export/Import JSON des données
-- [x] Synchronisation temps réel frontend-backend
+### index.html (Principal)
+- Nouveau logo : Image externe DIALIBATOU
+- Hook `useData` : Mode hybride API/localStorage
+- Configuration simple de l'URL backend
 
-### Frontend (Existant)
-- [x] Page d'accueil avec recherche
-- [x] Catalogue de biens avec filtres
-- [x] Page détail propriété
-- [x] Page Coopérative d'habitat
-- [x] Page Services
-- [x] Page Contact avec WhatsApp
-- [x] Mode sombre
-- [x] Design responsive
-
----
-
-## Fichiers Clés
-
+### Fichiers Backend (pour déploiement futur)
 ```
-/app/
-├── backend/
-│   ├── server.py          # API FastAPI
-│   ├── requirements.txt   # Dépendances Python
-│   └── .env               # MONGO_URL, DB_NAME
-├── frontend/
-│   ├── public/
-│   │   └── index.html     # Site complet (React via CDN)
-│   ├── src/
-│   │   └── setupProxy.js  # Proxy API
-│   └── .env               # REACT_APP_BACKEND_URL
-└── dialibatou-site/
-    └── index.html         # Copie synchronisée
+/app/backend/
+├── server.py          # API FastAPI
+├── requirements.txt   # Dépendances
+└── .env               # MONGO_URL, DB_NAME
 ```
 
 ---
 
 ## Données par Défaut
-- 12 propriétés immobilières (appartements, villas, terrains, bureaux)
+- 60 propriétés immobilières (appartements, villas, terrains, bureaux)
 - 8 lotissements coopérative (Bambilor, Thiès, Diass, etc.)
 
 ---
 
-## Configuration Production
+## Déploiement sur GitHub/Vercel
 
-Pour déployer en production, modifier l'URL de l'API dans `/app/frontend/public/index.html`:
-```javascript
-window.REACT_APP_BACKEND_URL = 'https://votre-api-url.com';
-```
+Le fichier `index.html` modifié peut être directement poussé sur GitHub.
+Le site fonctionnera en mode localStorage par défaut.
+
+**Pour activer le mode API** :
+1. Déployer le backend sur Render/Railway
+2. Modifier `REACT_APP_BACKEND_URL` dans index.html
+3. Redéployer sur Vercel
 
 ---
 
 ## Date
 - Implémentation: 3 Février 2026
 
+## Complété
+- [x] Analyse du problème de persistance
+- [x] Implémentation backend FastAPI + MongoDB
+- [x] Mode hybride API/localStorage
+- [x] Nouveau logo DIALIBATOU officiel
+- [x] Tests fonctionnels
+
 ## Backlog P1/P2
-- [ ] P1: Authentification admin sécurisée (JWT)
-- [ ] P1: Upload images vers stockage cloud (S3/Cloudinary)
-- [ ] P2: Notifications par email lors de nouveau contact
-- [ ] P2: Statistiques de visites avancées
-- [ ] P2: Gestion multi-utilisateurs admin
+- [ ] P1: Déployer backend sur Render/Railway pour persistance serveur
+- [ ] P1: Stockage images cloud (Cloudinary) au lieu de Base64
+- [ ] P2: Authentification admin sécurisée (JWT)
+- [ ] P2: Notifications email
