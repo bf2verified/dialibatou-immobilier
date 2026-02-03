@@ -430,36 +430,16 @@ const I={
 const Ic=({n,c="w-5 h-5"})=><svg className={c} fill="none" stroke="currentColor" viewBox="0 0 24 24">{I[n]}</svg>;
 
 // COMPONENTS
+const LOGO_URL="https://customer-assets.emergentagent.com/job_upload-sync-test/artifacts/njplviwo_Logo%20Dialibatou%20BTP%20IMMO.jpeg";
 const Logo=({l,sz="md"})=>{
-  const sizes={sm:"h-10",md:"h-12",lg:"h-16"};
+  const sizes={sm:"h-10",md:"h-14",lg:"h-20"};
   return(
-    <div className="flex items-center gap-3">
-      <div className={`${sizes[sz]} aspect-square relative`}>
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <defs>
-            <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#F5D060"/><stop offset="50%" stopColor="#D4AF37"/><stop offset="100%" stopColor="#B8973A"/></linearGradient>
-            <linearGradient id="silver" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#E8E8E8"/><stop offset="50%" stopColor="#B0B0B0"/><stop offset="100%" stopColor="#808080"/></linearGradient>
-            <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#4A90D9"/><stop offset="100%" stopColor="#2C5F8A"/></linearGradient>
-          </defs>
-          <rect x="20" y="25" width="12" height="45" rx="1" fill="url(#blue)"/>
-          <rect x="35" y="15" width="14" height="55" rx="1" fill="url(#silver)"/>
-          <rect x="37" y="20" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
-          <rect x="42" y="20" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
-          <rect x="37" y="28" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
-          <rect x="42" y="28" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
-          <rect x="37" y="36" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
-          <rect x="42" y="36" width="3" height="4" rx="0.5" fill="#fff" opacity="0.6"/>
-          <polygon points="55,35 75,35 85,55 55,55" fill="url(#silver)"/>
-          <polygon points="55,35 70,22 85,35" fill="url(#gold)"/>
-          <rect x="63" y="42" width="6" height="8" rx="0.5" fill="#555"/>
-          <rect x="73" y="40" width="5" height="6" rx="0.5" fill="#fff" opacity="0.5"/>
-          <ellipse cx="55" cy="72" rx="35" ry="8" fill="none" stroke="url(#gold)" strokeWidth="2.5"/>
-        </svg>
-      </div>
-      <div className="flex flex-col">
-        <span className={`font-bold ${sz==='lg'?'text-2xl':'text-xl'} ${l?'text-white':'text-gray-900'}`}>DIALI<span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">BATOU</span></span>
-        <span className={`text-xs font-medium tracking-widest ${l?'text-gray-300':'text-gray-500'}`}>— BTP IMMOBILIER —</span>
-      </div>
+    <div className="flex items-center">
+      <img 
+        src={LOGO_URL} 
+        alt="DIALIBATOU BTP IMMOBILIER" 
+        className={`${sizes[sz]} object-contain ${l?'brightness-110':'drop-shadow-md'}`}
+      />
     </div>
   );
 };
