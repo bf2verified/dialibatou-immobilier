@@ -71,8 +71,14 @@
 <body class="bg-white transition-colors duration-300">
 <div id="root"></div>
 <script>
-// Inject API URL from environment or use relative path
-window.REACT_APP_BACKEND_URL = 'http://localhost:8001';
+// ============================================
+// CONFIGURATION API BACKEND
+// ============================================
+// Pour déployer sur Vercel/GitHub Pages, modifiez cette URL
+// vers votre backend hébergé (ex: Render, Railway)
+// Laissez vide pour utiliser les données locales par défaut
+window.REACT_APP_BACKEND_URL = '';
+// ============================================
 </script>
 <script type="text/babel">
 const {useState,useEffect,useMemo,useRef,useCallback}=React;
@@ -100,10 +106,16 @@ const LOTS_INIT=[
 
 // API URL configuration
 const API_URL = window.REACT_APP_BACKEND_URL || '';
+const USE_API = API_URL !== '';
+
+// Fonctions localStorage (fallback si pas d'API)
+const loadLocal=(key,defaultVal)=>{try{const d=localStorage.getItem(`dialibatou_${key}`);return d?JSON.parse(d):defaultVal}catch{return defaultVal}};
+const saveLocal=(key,data)=>{localStorage.setItem(`dialibatou_${key}`,JSON.stringify(data))};
 
 // API helper functions
 const api = {
   get: async (endpoint) => {
+    if (!USE_API) return null;
     try {
       const res = await fetch(`${API_URL}${endpoint}`);
       if (!res.ok) throw new Error('API Error');
@@ -114,6 +126,7 @@ const api = {
     }
   },
   post: async (endpoint, data) => {
+    if (!USE_API) return null;
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
@@ -128,6 +141,7 @@ const api = {
     }
   },
   put: async (endpoint, data) => {
+    if (!USE_API) return null;
     try {
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'PUT',
@@ -142,6 +156,7 @@ const api = {
     }
   },
   delete: async (endpoint) => {
+    if (!USE_API) return null;
     try {
       const res = await fetch(`${API_URL}${endpoint}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('API Error');
@@ -153,15 +168,19 @@ const api = {
   }
 };
 
-// Hook pour gérer les données dynamiques via API
+// Hook pour gérer les données dynamiques (API ou localStorage)
 const useData=()=>{
-  const [properties,setProperties]=useState(null);
-  const [lots,setLots]=useState(LOTS_INIT);
-  const [loading,setLoading]=useState(true);
+  const [properties,setProperties]=useState(()=>USE_API?null:loadLocal('properties',null));
+  const [lots,setLots]=useState(()=>USE_API?LOTS_INIT:loadLocal('lots',LOTS_INIT));
+  const [loading,setLoading]=useState(USE_API);
   const [refreshKey,setRefreshKey]=useState(0);
 
-  // Charger les données depuis l'API au démarrage
+  // Charger les données depuis l'API au démarrage (si API configurée)
   useEffect(()=>{
+    if (!USE_API) {
+      setLoading(false);
+      return;
+    }
     const fetchData = async () => {
       setLoading(true);
       const [propsData, lotsData] = await Promise.all([
@@ -175,47 +194,52 @@ const useData=()=>{
     fetchData();
   },[refreshKey]);
 
-  // Rafraîchir les données depuis l'API
-  const refresh=useCallback(()=>{
-    setRefreshKey(k=>k+1);
+  // Écouter les changements de localStorage (mode sans API)
+  useEffect(()=>{
+    if (USE_API) return;
+    const handleStorage=(e)=>{
+      if(e.key==='dialibatou_properties'){setProperties(e.newValue?JSON.parse(e.newValue):null)}
+      if(e.key==='dialibatou_lots'){setLots(e.newValue?JSON.parse(e.newValue):LOTS_INIT)}
+    };
+    window.addEventListener('storage',handleStorage);
+    return()=>window.removeEventListener('storage',handleStorage);
   },[]);
 
-  const updateProps=async(newProps)=>{
-    // Valider et nettoyer les propriétés avant de sauvegarder
-    const cleanProps=newProps.map(p=>({
-      ...p,
-      im:p.im||[],
-      fe:p.fe||[],
-      vd:p.vd||[],
-      vi:p.vi||0,
-      ag:p.ag||{na:'Mame Cheikh Ndiaye',ph:CO.ph[0]}
-    }));
-    setProperties(cleanProps);
-    // Sauvegarder vers l'API - supprimer et recréer toutes les propriétés
-    for (const prop of cleanProps) {
-      if (prop.id && prop.id.startsWith('p') && !isNaN(prop.id.slice(1))) {
-        await api.put(`/api/properties/${prop.id}`, prop);
-      } else {
-        await api.post('/api/properties', prop);
-      }
+  // Rafraîchir les données
+  const refresh=useCallback(()=>{
+    if (USE_API) {
+      setRefreshKey(k=>k+1);
+    } else {
+      setProperties(loadLocal('properties',null));
+      setLots(loadLocal('lots',LOTS_INIT));
     }
-  };
+  },[]);
 
   const addProperty=async(prop)=>{
     const cleanProp = {
       ...prop,
+      id: prop.id || 'p'+Date.now(),
       im:prop.im||[],
       fe:prop.fe||[],
       vd:prop.vd||[],
       vi:prop.vi||0,
       ag:prop.ag||{na:'Mame Cheikh Ndiaye',ph:CO.ph[0]}
     };
-    const result = await api.post('/api/properties', cleanProp);
-    if (result) {
-      setProperties(prev => prev ? [...prev, result] : [result]);
-      return result;
+    if (USE_API) {
+      const result = await api.post('/api/properties', cleanProp);
+      if (result) {
+        setProperties(prev => prev ? [...prev, result] : [result]);
+        return result;
+      }
+      return null;
+    } else {
+      setProperties(prev => {
+        const newProps = prev ? [...prev, cleanProp] : [cleanProp];
+        saveLocal('properties', newProps);
+        return newProps;
+      });
+      return cleanProp;
     }
-    return null;
   };
 
   const updateProperty=async(prop)=>{
@@ -227,71 +251,112 @@ const useData=()=>{
       vi:prop.vi||0,
       ag:prop.ag||{na:'Mame Cheikh Ndiaye',ph:CO.ph[0]}
     };
-    const result = await api.put(`/api/properties/${prop.id}`, cleanProp);
-    if (result) {
-      setProperties(prev => prev ? prev.map(p => p.id === prop.id ? result : p) : [result]);
-      return result;
+    if (USE_API) {
+      const result = await api.put(`/api/properties/${prop.id}`, cleanProp);
+      if (result) {
+        setProperties(prev => prev ? prev.map(p => p.id === prop.id ? result : p) : [result]);
+        return result;
+      }
+      return null;
+    } else {
+      setProperties(prev => {
+        const newProps = prev ? prev.map(p => p.id === prop.id ? cleanProp : p) : [cleanProp];
+        saveLocal('properties', newProps);
+        return newProps;
+      });
+      return cleanProp;
     }
-    return null;
   };
 
   const deleteProperty=async(id)=>{
-    const result = await api.delete(`/api/properties/${id}`);
-    if (result) {
-      setProperties(prev => prev ? prev.filter(p => p.id !== id) : []);
-      return true;
-    }
-    return false;
-  };
-
-  const updateLots=async(newLots)=>{
-    setLots(newLots);
-    // Sauvegarder vers l'API
-    for (const lot of newLots) {
-      if (lot.id && lot.id.startsWith('lot')) {
-        await api.put(`/api/lots/${lot.id}`, lot);
-      } else {
-        await api.post('/api/lots', lot);
+    if (USE_API) {
+      const result = await api.delete(`/api/properties/${id}`);
+      if (result) {
+        setProperties(prev => prev ? prev.filter(p => p.id !== id) : []);
+        return true;
       }
+      return false;
+    } else {
+      setProperties(prev => {
+        const newProps = prev ? prev.filter(p => p.id !== id) : [];
+        saveLocal('properties', newProps);
+        return newProps;
+      });
+      return true;
     }
   };
 
   const addLot=async(lot)=>{
-    const result = await api.post('/api/lots', lot);
-    if (result) {
-      setLots(prev => [...prev, result]);
-      return result;
+    const cleanLot = {...lot, id: lot.id || 'lot'+Date.now()};
+    if (USE_API) {
+      const result = await api.post('/api/lots', cleanLot);
+      if (result) {
+        setLots(prev => [...prev, result]);
+        return result;
+      }
+      return null;
+    } else {
+      setLots(prev => {
+        const newLots = [...prev, cleanLot];
+        saveLocal('lots', newLots);
+        return newLots;
+      });
+      return cleanLot;
     }
-    return null;
   };
 
   const updateLot=async(lot)=>{
-    const result = await api.put(`/api/lots/${lot.id}`, lot);
-    if (result) {
-      setLots(prev => prev.map(l => l.id === lot.id ? result : l));
-      return result;
+    if (USE_API) {
+      const result = await api.put(`/api/lots/${lot.id}`, lot);
+      if (result) {
+        setLots(prev => prev.map(l => l.id === lot.id ? result : l));
+        return result;
+      }
+      return null;
+    } else {
+      setLots(prev => {
+        const newLots = prev.map(l => l.id === lot.id ? lot : l);
+        saveLocal('lots', newLots);
+        return newLots;
+      });
+      return lot;
     }
-    return null;
   };
 
   const deleteLot=async(id)=>{
-    const result = await api.delete(`/api/lots/${id}`);
-    if (result) {
-      setLots(prev => prev.filter(l => l.id !== id));
+    if (USE_API) {
+      const result = await api.delete(`/api/lots/${id}`);
+      if (result) {
+        setLots(prev => prev.filter(l => l.id !== id));
+        return true;
+      }
+      return false;
+    } else {
+      setLots(prev => {
+        const newLots = prev.filter(l => l.id !== id);
+        saveLocal('lots', newLots);
+        return newLots;
+      });
       return true;
     }
-    return false;
   };
 
   const resetData=async()=>{
-    await api.post('/api/reset');
+    if (USE_API) {
+      await api.post('/api/reset');
+    } else {
+      localStorage.removeItem('dialibatou_properties');
+      localStorage.removeItem('dialibatou_lots');
+      setProperties(null);
+      setLots(LOTS_INIT);
+    }
     refresh();
   };
 
   return {
     properties,lots,loading,
-    updateProps,addProperty,updateProperty,deleteProperty,
-    updateLots,addLot,updateLot,deleteLot,
+    addProperty,updateProperty,deleteProperty,
+    addLot,updateLot,deleteLot,
     resetData,refresh,
     hasCustomData:properties!==null && properties.length>0,
     refreshKey
