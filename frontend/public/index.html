@@ -70,6 +70,10 @@
 </head>
 <body class="bg-white transition-colors duration-300">
 <div id="root"></div>
+<script>
+// Inject API URL from environment or use relative path
+window.REACT_APP_BACKEND_URL = '';
+</script>
 <script type="text/babel">
 const {useState,useEffect,useMemo,useRef,useCallback}=React;
 
