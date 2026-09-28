@@ -1,16 +1,25 @@
--e 
 # Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+.env
+.env.*
+!.env.example
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers uploadés localement (données binaires) — on garde la structure vide
+dialibatou-backend/uploads/**
+!dialibatou-backend/uploads/
+!dialibatou-backend/uploads/**/
+!dialibatou-backend/uploads/**/.gitkeep
+
+# Node / divers
+node_modules/
+.DS_Store
+
+
+# Sauvegarde locale de l ancien index (contient l ancien code, ne pas versionner)
+index.backup.html

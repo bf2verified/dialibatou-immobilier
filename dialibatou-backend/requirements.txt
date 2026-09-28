@@ -1,0 +1,12 @@
+# DIALIBATOU BTP IMMOBILIER — Backend FastAPI (Python 3.11+ / testé en 3.14)
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30
+SQLAlchemy>=2.0.36
+psycopg[binary]>=3.2          # driver PostgreSQL 3 (compatible Python 3.14)
+pydantic>=2.9
+email-validator>=2.0          # EmailStr pour /api/messages
+PyJWT>=2.8                    # JWT admin
+bcrypt>=4.1                   # hash des mots de passe
+python-multipart>=0.0.9       # uploads multipart/form-data
+python-dotenv>=1.0            # lecture du .env
+requests>=2.31                # utilise par backend_test.py
